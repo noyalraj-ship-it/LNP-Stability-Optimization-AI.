@@ -84,8 +84,7 @@ nav.bg-white {
   transition: color 0.2s ease;
 }
 
-.nav-links a:hover,
-.nav-links a.active {
+.nav-links a:hover, .nav-links a.active {
   color: var(--primary-color);
 }
 
@@ -163,9 +162,9 @@ a.group:hover .card-hover {
 }
 
 .bg-primary-100 { color: #2563eb; background-color: #dbeafe; }
-.bg-green-100 { color: #16a34a; background-color: #dcfce7; }
-.bg-purple-100 { color: #7e22ce; background-color: #f3e8ff; }
-.bg-orange-100 { color: #ea580c; background-color: #ffedd5; }
+.bg-green-100   { color: #16a34a; background-color: #dcfce7; }
+.bg-purple-100  { color: #7e22ce; background-color: #f3e8ff; }
+.bg-orange-100  { color: #ea580c; background-color: #ffedd5; }
 
 /* --- Filters & Main Analytics Layout Split --- */
 .bg-gray-50 { background-color: #f9fafb; }
@@ -236,9 +235,7 @@ a.group:hover .card-hover {
 
 .h-8 { height: 2rem; width: 2rem; border-width: 2px; }
 .h-12 { height: 3rem; width: 3rem; border-width: 3px; }
-.border-primary-600 {
-  border-color: transparent transparent var(--primary-color) var(--primary-color);
-}
+.border-primary-600 { border-color: transparent transparent var(--primary-color) var(--primary-color); }
 
 @keyframes spin {
   from { transform: rotate(0deg); }
