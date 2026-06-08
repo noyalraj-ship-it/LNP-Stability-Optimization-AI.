@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>HelixGraph - Lipid Nanoparticle Database</title>
+  <meta name="description" content="Comprehensive database of lipid nanoparticle compositions, properties, and performance data for mRNA delivery research"/>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="ggg.css"/>
+  
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; }
+    .font-outfit { font-family: 'Outfit', sans-serif; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body class="bg-[#f8fafc] text-[#0f172a] min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- Nav Bar -->
+  <nav class="bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <a class="flex items-center cursor-pointer" onclick="switchTab('home')">
+          <div class="w-10 h-10 bg-gradient-to-br from-teal-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
+            <i class="fas fa-dna text-white text-lg"></i>
+          </div>
+          <span class="ml-3 text-2xl font-bold font-outfit text-gray-900 tracking-tight">HelixGraph</span>
+        </a>
+        <div class="hidden md:flex items-center space-x-8">
+          <button class="nav-link font-medium text-primary-600 transition-colors" onclick="switchTab('home')" id="nav-home">Home</button>
+          <button class="nav-link font-medium text-gray-600 hover:text-primary-600 transition-colors" onclick="switchTab('lipid-table')" id="nav-lipid-table">Lipid Table</button>
+          <button class="nav-link font-medium text-gray-600 hover:text-primary-600 transition-colors" onclick="switchTab('upload')" id="nav-upload">Upload</button>
+          <button class="nav-link font-medium text-gray-600 hover:text-primary-600 transition-colors" onclick="switchTab('help')" id="nav-help">Help</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HOME TAB -->
+  <div id="tab-home" class="tab-content active flex-1">
+    
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-teal-600 to-indigo-600 text-white py-16 relative overflow-hidden">
+      <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:20px_20px]"></div>
+      <div class="max-w-7xl mx-auto px-4 text-center relative z-10">
+        <h1 class="text-4xl md:text-6xl font-bold font-outfit mb-6 tracking-tight">HelixGraph</h1>
+        <p class="text-lg md:text-xl mb-8 opacity-90 font-light max-w-4xl mx-auto">
+          Comprehensive database of lipid nanoparticle compositions, properties, and performance data for mRNA delivery research.
+        </p>
+        <div class="flex flex-wrap justify-center gap-6 text-sm">
+          <span class="flex items-center bg-white/10 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">
+            <i class="fas fa-layer-group text-blue-200 mr-2"></i><span id="badge-total-formulations">Loading...</span>
+          </span>
+          <span class="flex items-center bg-white/10 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">
+            <i class="fas fa-vial text-green-200 mr-2"></i><span id="badge-total-lipids">Loading...</span>
+          </span>
+          <span class="flex items-center bg-white/10 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">
+            <i class="fas fa-file-alt text-purple-200 mr-2"></i><span id="badge-total-papers">Loading...</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Metrics Cards -->
+    <section class="py-12 bg-white">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="bg-gray-50 p-6 rounded-xl text-center border border-gray-100 hover:shadow-md transition">
+            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-flask"></i></div>
+            <h3 class="text-3xl font-bold text-gray-900" id="metric-formulations">-</h3>
+            <p class="text-sm text-gray-500">LNP Formulations</p>
+          </div>
+          <div class="bg-gray-50 p-6 rounded-xl text-center border border-gray-100 hover:shadow-md transition">
+            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-atom"></i></div>
+            <h3 class="text-3xl font-bold text-gray-900" id="metric-lipids">-</h3>
+            <p class="text-sm text-gray-500">Unique Lipids</p>
+          </div>
+          <div class="bg-gray-50 p-6 rounded-xl text-center border border-gray-100 hover:shadow-md transition">
+            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-chart-line"></i></div>
+            <h3 class="text-3xl font-bold text-gray-900" id="metric-encapsulation">-</h3>
+            <p class="text-sm text-gray-500">Avg. Encapsulation</p>
+          </div>
+          <div class="bg-gray-50 p-6 rounded-xl text-center border border-gray-100 hover:shadow-md transition">
+            <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-book"></i></div>
+            <h3 class="text-3xl font-bold text-gray-900" id="metric-papers">-</h3>
+            <p class="text-sm text-gray-500">Research Papers</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters and Results section -->
+    <section class="py-12 bg-[#f8fafc]">
+      <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        <!-- Sidebar Filters -->
+        <div class="md:col-span-1 bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-20 max-h-[85vh] overflow-y-auto">
+          <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <h3 class="font-bold text-gray-900 flex items-center"><i class="fas fa-filter text-blue-500 mr-2"></i> Filters</h3>
+            <button onclick="resetFilters()" class="text-xs font-semibold text-blue-600 hover:underline">Reset</button>
+          </div>
+          
+          <div class="space-y-5">
+            <!-- Dropdowns -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 mb-1">Ionizable Lipid</label>
+              <select id="filter-ionizable" onchange="applyFilters()" class="w-full border border-gray-200 p-2 rounded-lg text-sm bg-white text-gray-700 font-medium focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors cursor-pointer">
+                <option value="">Select...</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 mb-1">PEG Lipid</label>
+              <select id="filter-peg" onchange="applyFilters()" class="w-full border border-gray-200 p-2 rounded-lg text-sm bg-white text-gray-700 font-medium focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors cursor-pointer">
+                <option value="">Select...</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 mb-1">Sterol Lipid</label>
+              <select id="filter-sterol" onchange="applyFilters()" class="w-full border border-gray-200 p-2 rounded-lg text-sm bg-white text-gray-700 font-medium focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors cursor-pointer">
+                <option value="">Select...</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 mb-1">Helper Lipid</label>
+              <select id="filter-helper" onchange="applyFilters()" class="w-full border border-gray-200 p-2 rounded-lg text-sm bg-white text-gray-700 font-medium focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors cursor-pointer">
+                <option value="">Select...</option>
+              </select>
+            </div>
+
+            <!-- Sliders -->
+            <div class="pt-2 border-t border-gray-100 mt-4">
+              <label class="block text-xs font-semibold text-gray-500 mb-1 mt-3">Particle size (nm)</label>
+              <input type="range" id="filter-size-max" min="0" max="500" value="500" oninput="applyFilters()" class="w-full accent-blue-600">
+              <div class="text-[10px] text-gray-500 mt-1" id="label-size">Selected: 0 ~ 500 nm</div>
+            </div>
+            <div class="pt-2">
+              <label class="block text-xs font-semibold text-gray-500 mb-1">PDI</label>
+              <input type="range" id="filter-pdi-max" min="0" max="1" step="0.01" value="1" oninput="applyFilters()" class="w-full accent-blue-600">
+              <div class="text-[10px] text-gray-500 mt-1" id="label-pdi">Selected: 0.00 ~ 1.00</div>
+            </div>
+            <div class="pt-2">
+              <label class="block text-xs font-semibold text-gray-500 mb-1">Zeta potential (mV)</label>
+              <input type="range" id="filter-zeta-max" min="-50" max="50" step="1" value="50" oninput="applyFilters()" class="w-full accent-blue-600">
+              <div class="text-[10px] text-gray-500 mt-1" id="label-zeta">Selected: -50 ~ 50 mV</div>
+            </div>
+            <div class="pt-2">
+              <label class="block text-xs font-semibold text-gray-500 mb-1">Encapsulation efficiency (%)</label>
+              <input type="range" id="filter-encapsulation-max" min="0" max="100" value="100" oninput="applyFilters()" class="w-full accent-blue-600">
+              <div class="text-[10px] text-gray-500 mt-1" id="label-encapsulation">Selected: 0 ~ 100 %</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Card List -->
+        <div class="md:col-span-3">
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 min-h-[600px] flex flex-col">
+            <div class="flex flex-col sm:flex-row justify-between items-center border-b border-gray-100 pb-4 mb-4 gap-4">
+              <h3 class="font-bold text-gray-900 text-lg">Results</h3>
+              <div class="flex items-center gap-4">
+                <span class="text-xs font-medium text-gray-500"><span id="result-count" class="text-gray-900 font-bold">0</span> results</span>
+                <select id="page-size" onchange="changePageSize()" class="border border-gray-200 text-xs rounded-lg p-1.5 focus:outline-blue-500 focus:border-blue-500 bg-gray-50">
+                  <option value="10">10</option>
+                  <option value="25" selected>25</option>
+                  <option value="50">50</option>
+                </select>
+                <button onclick="exportCSV()" class="text-xs font-semibold text-gray-600 hover:text-blue-600 bg-gray-50 border border-gray-200 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-colors flex items-center">
+                  <i class="fas fa-file-export mr-2"></i> Export CSV
+                </button>
+              </div>
+            </div>
+            
+            <div id="results-container" class="space-y-4 flex-1">
+              <div class="flex justify-center items-center h-48 text-gray-400">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div> Loading data...
+              </div>
+            </div>
+
+            <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
+              <span class="text-xs text-gray-500 font-medium">Showing <span id="pagination-info" class="text-gray-900 font-bold">0 to 0 of 0</span> results</span>
+              <div class="flex gap-2">
+                <button id="btn-prev" onclick="prevPage()" class="px-3 py-1 border border-gray-200 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"><i class="fas fa-chevron-left mr-1"></i> Prev</button>
+                <button id="btn-next" onclick="nextPage()" class="px-3 py-1 border border-transparent rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Next <i class="fas fa-chevron-right ml-1"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Data Analytics Dashboard -->
+    <section class="py-16 bg-white border-t border-gray-100">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-10">
+          <h2 class="text-3xl font-bold font-outfit text-gray-900 mb-2">Data Analytics Dashboard</h2>
+          <p class="text-gray-500">Explore trends and relationships in LNP performance data</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="bg-gray-50 border border-gray-100 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+            <h3 class="text-sm font-bold text-gray-800 mb-4 text-center">Particle Size vs Encapsulation Efficiency</h3>
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+              <h4 class="text-xs font-semibold text-center mb-4 text-gray-600">Particle Size Distribution (50-200nm)</h4>
+              <div class="relative w-full h-[300px]">
+                <canvas id="chart-histogram"></canvas>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-gray-50 border border-gray-100 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+            <h3 class="text-sm font-bold text-gray-800 mb-4 text-center">Lipid Composition Distribution</h3>
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+              <h4 class="text-xs font-semibold text-center mb-4 text-gray-600">Top 20 Ionizable Lipids Distribution</h4>
+              <div class="relative w-full h-[300px] flex justify-center">
+                <canvas id="chart-doughnut"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- UPLOAD TAB -->
+  <div id="tab-upload" class="tab-content bg-[#f8fafc] flex-1 py-12">
+    <div class="max-w-3xl mx-auto px-4">
+      <h2 class="text-3xl font-bold font-outfit text-center mb-2">Data Submission</h2>
+      <p class="text-center text-gray-500 text-sm mb-10">Contribute your lipid nanoparticle data to HelixGraph.</p>
+
+      <div class="space-y-6">
+        
+        <!-- Contribute Card -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
+          <h3 class="font-bold text-teal-800 flex items-center mb-3 text-lg"><i class="fas fa-layer-group bg-teal-100 text-teal-600 p-2 rounded-lg mr-3"></i> Contribute to HelixGraph</h3>
+          <ul class="list-disc pl-6 text-sm text-gray-600 space-y-2 mt-2 font-medium">
+            <li>Share your newly discovered lipid structures and performance metrics.</li>
+            <li>Help build a comprehensive resource for mRNA delivery research.</li>
+          </ul>
+        </div>
+
+        <!-- Submission Process Card -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
+          <h3 class="font-bold text-indigo-800 flex items-center mb-6 text-lg"><i class="fas fa-list-check bg-indigo-100 text-indigo-600 p-2 rounded-lg mr-3"></i> Submission Process</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+            <div class="border border-indigo-100 rounded-xl p-5 text-center bg-indigo-50/30">
+              <div class="w-8 h-8 rounded-full bg-white text-indigo-600 border border-indigo-200 mx-auto flex items-center justify-center font-bold mb-3 shadow-sm">1</div>
+              <p class="text-sm font-bold text-gray-800">Prepare dataset</p>
+              <p class="text-xs text-gray-500 mt-2 leading-relaxed">Format your data to match our schema template.</p>
+            </div>
+            <div class="border border-indigo-100 rounded-xl p-5 text-center bg-indigo-50/30">
+              <div class="w-8 h-8 rounded-full bg-white text-indigo-600 border border-indigo-200 mx-auto flex items-center justify-center font-bold mb-3 shadow-sm">2</div>
+              <p class="text-sm font-bold text-gray-800">Upload CSV file</p>
+              <p class="text-xs text-gray-500 mt-2 leading-relaxed">Use the upload tool below to parse data locally.</p>
+            </div>
+            <div class="border border-indigo-100 rounded-xl p-5 text-center bg-indigo-50/30">
+              <div class="w-8 h-8 rounded-full bg-white text-indigo-600 border border-indigo-200 mx-auto flex items-center justify-center font-bold mb-3 shadow-sm">3</div>
+              <p class="text-sm font-bold text-gray-800">Data integration</p>
+              <p class="text-xs text-gray-500 mt-2 leading-relaxed">System visualizes your dataset instantly.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload Action Card -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
+          <h3 class="font-bold text-teal-800 flex items-center mb-3 text-lg"><i class="fas fa-file-csv bg-teal-100 text-teal-600 p-2 rounded-lg mr-3"></i> Upload CSV</h3>
+          <p class="text-sm text-gray-600 mb-5">You can load your custom dataset offline by selecting a CSV file here.</p>
+          <div class="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:bg-gray-50 transition cursor-pointer" onclick="document.getElementById('csv-file-input').click()">
+            <div class="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-cloud-upload-alt text-2xl text-gray-500"></i>
+            </div>
+            <p class="text-sm text-gray-700 font-medium mb-1">Drag and drop CSV file here</p>
+            <p class="text-xs text-gray-400 mb-5">or click to browse your files</p>
+            <button class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition shadow-sm">Browse Files</button>
+            <input type="file" id="csv-file-input" class="hidden" accept=".csv" onchange="handleCSVUpload(event)">
+          </div>
+        </div>
+
+        <!-- Use This Template Card -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-teal-500 hover:shadow-md transition">
+          <h3 class="font-bold text-gray-900 flex items-center mb-2 text-lg"><i class="fas fa-file-csv text-gray-800 mr-2"></i> Use This Template</h3>
+          <p class="text-xs text-gray-500 mb-5 font-medium">CSV input template — standardized column headers for LNP data submission</p>
+          <a href="LNP-mRNA Dataset.csv" download class="inline-flex items-center justify-center bg-gradient-to-r from-teal-500 to-indigo-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm hover:from-teal-600 hover:to-indigo-600 transition">
+            <i class="fas fa-download mr-2"></i> Download Template (CSV)
+          </a>
+        </div>
+
+        <!-- Submission Requirements -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
+          <h3 class="font-bold text-teal-800 flex items-center mb-4 text-lg"><i class="fas fa-clipboard-check bg-teal-100 text-teal-600 p-2 rounded-lg mr-3"></i> Submission Requirements</h3>
+          
+          <div class="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 rounded-r-lg text-sm mb-6 flex items-start shadow-sm">
+            <i class="fas fa-exclamation-triangle mt-1 mr-3 text-yellow-600"></i>
+            <div>
+              <strong class="block mb-1">Important: CSV format strictly required.</strong>
+              Ensure your file uses exact column headers for successful client-side parsing.
+            </div>
+          </div>
+          
+          <h4 class="text-sm font-bold text-gray-800 mb-3 border-b border-gray-100 pb-2">Required Column Headers:</h4>
+          <div class="bg-slate-50 border border-slate-200 p-4 rounded-lg">
+            <ul class="text-xs font-mono text-slate-700 space-y-2 leading-relaxed">
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 text-[10px]"></i> lnp_id, ionizable_lipid, peg_lipid, sterol_lipid</li>
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 text-[10px]"></i> helper_lipid, lipid_molar_ratio</li>
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 text-[10px]"></i> particle_size_nm_std, pdi_std, zeta_potential_mv_std</li>
+              <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2 text-[10px]"></i> encapsulation_efficiency_percent_std, target_type</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Data Quality Guidelines -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
+          <h3 class="font-bold text-teal-800 flex items-center mb-4 text-lg"><i class="fas fa-shield-alt bg-teal-100 text-teal-600 p-2 rounded-lg mr-3"></i> Data Quality Guidelines</h3>
+          <ul class="list-disc pl-6 text-sm text-gray-600 space-y-2 font-medium">
+            <li>Ensure all numerical fields are formatted correctly without units (e.g. use "150" instead of "150 nm").</li>
+            <li>Use standard naming conventions for commonly known lipids.</li>
+            <li>Fill out optional fields such as DOI and Paper Title if the data is published.</li>
+            <li>Double check the lipid molar ratio format (e.g., 50:1.5:38.5:10).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIPID TABLE TAB (Mapping & SMILES) -->
+  <div id="tab-lipid-table" class="tab-content bg-white flex-1 py-12">
+    <div class="max-w-5xl mx-auto px-4">
+      <h2 class="text-3xl font-bold font-outfit text-gray-900 mb-8 pb-4 border-b border-gray-100">Lipid Reference Library</h2>
+      
+      <div class="mb-12">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Mapping</h3>
+        <p class="text-sm text-gray-500 mb-6 font-medium">Standardized nomenclature mapping for common lipid formulations.</p>
+        <div class="border border-gray-200 rounded-xl shadow-sm max-h-[450px] overflow-y-auto">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead class="bg-gray-50 border-b border-gray-200 sticky top-0 z-10 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
+              <tr>
+                <th class="p-4 font-bold text-gray-800 uppercase text-xs tracking-wider bg-gray-50">Field Name</th>
+                <th class="p-4 font-bold text-gray-800 uppercase text-xs tracking-wider bg-gray-50">Description</th>
+              </tr>
+            </thead>
+            <tbody id="mapping-tbody" class="divide-y divide-gray-100 text-gray-600 bg-white">
+              <tr><td colspan="2" class="p-8 text-center text-gray-400">Loading mapping library...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">SMILES</h3>
+        <p class="text-sm text-gray-500 mb-6 font-medium">Chemical structure representations (Simplified Molecular-Input Line-Entry System).</p>
+        <div class="border border-gray-200 rounded-xl shadow-sm max-h-[450px] overflow-y-auto">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead class="bg-gray-50 border-b border-gray-200 sticky top-0 z-10 shadow-[0_1px_0_0_rgba(226,232,240,1)]">
+              <tr>
+                <th class="p-4 font-bold text-gray-800 uppercase text-xs tracking-wider w-1/4 bg-gray-50">Lipid Name</th>
+                <th class="p-4 font-bold text-gray-800 uppercase text-xs tracking-wider bg-gray-50">SMILES String</th>
+              </tr>
+            </thead>
+            <tbody id="smiles-tbody" class="divide-y divide-gray-100 text-gray-600 font-mono text-[11px] bg-white">
+              <tr><td colspan="2" class="p-8 text-center text-gray-400">Loading SMILES library...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HELP TAB -->
+  <div id="tab-help" class="tab-content bg-[#f8fafc] flex-1 py-16">
+    <div class="max-w-3xl mx-auto px-4 text-center">
+      <div class="w-16 h-16 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl shadow-sm"><i class="fas fa-question-circle"></i></div>
+      <h2 class="text-3xl font-bold mb-4 font-outfit text-gray-900">Help & Documentation</h2>
+      <p class="text-gray-600 leading-relaxed max-w-2xl mx-auto mb-8">
+        HelixGraph is designed to run entirely locally in your browser for maximum privacy and performance. 
+        All filtering, pagination, and visualizations are rendered on your machine using the loaded CSV file.
+      </p>
+      
+      <div class="flex flex-col md:flex-row gap-6 justify-center items-stretch max-w-4xl mx-auto">
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-left flex-1">
+          <h3 class="font-bold text-gray-800 mb-3"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i> Quick Tips</h3>
+          <ul class="list-disc pl-5 text-sm text-gray-600 space-y-2">
+            <li>Use the <strong>Home</strong> tab to filter and browse specific formulations.</li>
+            <li>Scroll down on the Home tab to view the <strong>Data Analytics Dashboard</strong>.</li>
+            <li>Use the <strong>Upload</strong> tab to ingest your custom LNP spreadsheet offline.</li>
+            <li>Visit the <strong>Lipid Table</strong> tab to view SMILES and mapping for all cataloged lipids.</li>
+          </ul>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-left flex-1 flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-gray-800 mb-3"><i class="fas fa-envelope text-teal-600 mr-2"></i> Support & Clarifications</h3>
+            <p class="text-sm text-gray-600 leading-relaxed mb-4">
+              For any questions, database clarifications, or inquiries regarding HelixGraph and its dataset, please feel free to reach out to us for assistance at:
+            </p>
+          </div>
+          <a href="mailto:noyalraj2005@gmail.com" class="inline-flex items-center justify-center text-teal-600 hover:text-teal-700 font-bold text-sm bg-teal-50 hover:bg-teal-100/80 px-4 py-2.5 rounded-lg transition shadow-sm border border-teal-100">
+            <i class="fas fa-envelope mr-2"></i> noyalraj2005@gmail.com
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-[#0f172a] text-white/80 py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="flex items-center">
+          <div class="w-8 h-8 bg-gradient-to-br from-teal-600 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
+            <i class="fas fa-dna text-white text-xs"></i>
+          </div>
+          <div>
+            <span class="text-xl font-bold font-outfit text-white tracking-tight">HelixGraph</span>
+            <p class="text-xs text-gray-500 mt-0.5">Open-access research database for mRNA delivery systems.</p>
+          </div>
+        </div>
+        <div class="text-center md:text-right">
+          <p class="text-sm font-semibold text-white">Noyalraj</p>
+          <p class="text-xs text-teal-400 font-bold uppercase tracking-wider mb-1">Founder & Developer</p>
+          <p class="text-[10px] text-gray-400">&copy; 2026 HelixGraph Project. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    const STATIC_MAPPING_LIBRARY = {
+      "DMG-PEG2000": "DMG-PEG2000",
+      "DMG-PEG 2000": "DMG-PEG2000",
+      "DMG-PEG-2000": "DMG-PEG2000",
+      "DMG-PEG2K": "DMG-PEG2000",
+      "PEG-DMG": "DMG-PEG2000",
+      "PEG2000-DMG": "DMG-PEG2000",
+      "mPEG2000-DMG": "DMG-PEG2000",
+      "PEG-DMG 2000": "DMG-PEG2000",
+      "PEG-DMG (PEG 2000-dimyristoyl glycerol)": "DMG-PEG2000",
+      "DMG (C14:0)-PEG-2k": "DMG-PEG2000",
+      "DMG-PEG": "DMG-PEG2000",
+      "DMG-C-PEG": "DMG-PEG2000",
+      "DMG-PEG (1,2-dimyristoyl-rac-glycero-3-methoxypolyethylene glycol-2000)": "DMG-PEG2000",
+      "PEG-S-DMG (PEG-dimyristoylglycerol, C14)": "DMG-PEG2000",
+      "C14-PEG2000": "C14-PEG2000",
+      "C14-PEG2000 (14:0 PEG2000 phosphoethanolamine)": "C14-PEG2000",
+      "C14-mPEG2000": "C14-PEG2000",
+      "C14PEG2000": "C14-PEG2000",
+      "C14-PEG-2000": "C14-PEG2000",
+      "C14PEG2K": "C14-PEG2000",
+      "PEG-C14 (PEG2000-dimyristyl)": "C14-PEG2000",
+      "C14 alkyl-tail PEG (optimized based on Screen 2)": "C14-PEG2000",
+      "PEG-C14 (diffusible)": "C14-PEG2000",
+      "C14-PEG3000": "C14-PEG3000",
+      "C14-PEG1000": "C14-PEG1000",
+      "PEG-DSPE": "DSPE-PEG2000",
+      "DSPE-PEG": "DSPE-PEG2000",
+      "DSPE-PEG2K": "DSPE-PEG2000",
+      "DSPE (C18:0)-PEG-2k": "DSPE-PEG2000",
+      "DSPE (C18:0)-PEG-0.55k": "DSPE-PEG550",
+      "DSPE (C18:0)-PEG-1k": "DSPE-PEG1000",
+      "DSPE (C18:0)-2arm-PEG-2k": "DSPE-2armPEG2000",
+      "DMPE-PEG 2000": "DMPE-PEG2000",
+      "DMPE-PEG": "DMPE-PEG2000",
+      "DMPE (C14:0)-PEG-2k": "DMPE-PEG2000",
+      "DMPE (C14:0)-PEG-0.55k": "DMPE-PEG550",
+      "DMPE (C14:0)-PEG-1k": "DMPE-PEG1000",
+      "C16-PEG2000 ceramide": "C16-Ceramide-PEG2000",
+      "C16-PEG 2000 ceramide": "C16-Ceramide-PEG2000",
+      "mPEG2000-Ceramide C16 or mPEG2000-DMG": "C16-Ceramide-PEG2000",
+      "mPEG2000-ceramideC16": "C16-Ceramide-PEG2000",
+      "C16-Ceramide-PEG": "C16-Ceramide-PEG2000",
+      "Ceramide": "C16-Ceramide-PEG2000",
+      "Ceramide (C16)-PEG-2k": "C16-Ceramide-PEG2000",
+      "PEG-CerC20 (PEG-ceramide C20)": "C20-Ceramide-PEG2000",
+      "C8-Ceramide-PEG": "C8-Ceramide-PEG2000",
+      "Ceramide (C8)-PEG-2k": "C8-Ceramide-PEG2000",
+      "Ceramide (C16)-PEG-0.75k": "C16-Ceramide-PEG750",
+      "Ceramide (C8)-PEG-0.75k": "C8-Ceramide-PEG750",
+      "ALC-0159": "ALC-0159",
+      "ALC-0159 (PEG2000-lipid)": "ALC-0159",
+      "PEG-C18 (PEG2000-distearyl)": "C18-PEG2000",
+      "C18PEG2000": "C18-PEG2000",
+      "PEG-C18 (persistent)": "C18-PEG2000",
+      "C18-CONH-PEG2000": "C18-PEG2000",
+      "PEG-S-DSG (PEG-distearoylglycerol, C18)": "C18-PEG2000",
+      "C18-PEG1000": "C18-PEG1000",
+      "C18-PEG3000": "C18-PEG3000",
+      "C18PEG2K": "C18-PEG2000",
+      "PEG-C16 (PEG2000-dipalmitoyl)": "C16-PEG2000",
+      "C16-PEG2000": "C16-PEG2000",
+      "PEG-S-DPG (PEG-dipalmitoylglycerol, C16)": "C16-PEG2000",
+      "C16-PEG1000": "C16-PEG1000",
+      "DSG": "DSG-PEG2000",
+      "PEG-DSG": "DSG-PEG2000",
+      "DSG-PEG": "DSG-PEG2000",
+      "DSG (C18:0)-PEG-2k": "DSG-PEG2000",
+      "PEG-s-DSG": "DSG-PEG2000",
+      "PEG2000-PE": "PE-PEG2000",
+      "DPPE": "DPPE",
+      "DPPE (C16:0)-PEG-2k": "DPPE-PEG2000",
+      "DPPE (C16:0)-PEG-1k": "DPPE-PEG1000",
+      "DOPE (C18:1)-PEG-2k": "DOPE-PEG2000",
+      "DOPE (C18:1)-PEG-1k": "DOPE-PEG1000",
+      "DOPE (C18:1)-PEG-0.55k": "DOPE-PEG550",
+      "PEG-lipid": "PEG-lipid",
+      "lipid-anchored PEG": "PEG-lipid",
+      "PEG lipid": "PEG-lipid",
+      "PEG-lipids": "PEG-lipid",
+      "PEG-lipid (diffusible)": "PEG-lipid",
+      "PEG-c-DMA": "PEG-c-DMA",
+      "PEG2000-C-DMA": "PEG-c-DMA",
+      "PEG-C-DMA": "PEG-c-DMA",
+      "PEG-s-DMG": "PEG-s-DMG",
+      "PEG-DMG (1.4-1.5%)": "DMG-PEG2000",
+      "PEG-DMG (4-5%)": "DMG-PEG2000",
+      "PEG-DMG (6-8%)": "DMG-PEG2000",
+      "PEG-DMG (1%) + GalNAc-PEG-DSG (0.5%)": "DMG-PEG2000",
+      "PEG-DMG (4.5%) + GalNAc-PEG-DSG (0.5%)": "DMG-PEG2000",
+      "Variable PEG (different alkyl lengths: C14, C18)": "PEG-lipid",
+      "C16-PEG2000 ceramide + mannose-PEG lipid": "C16-Ceramide-PEG2000",
+      "C16-PEG2000 ceramide + galactose-PEG lipid": "C16-Ceramide-PEG2000",
+      "DLin-MC3-DMA": "DLin-MC3-DMA",
+      "D-Lin-MC3-DMA": "DLin-MC3-DMA",
+      "MC3": "DLin-MC3-DMA",
+      "MC3-DMA": "DLin-MC3-DMA",
+      "DLin-MC3-DMA (MC3)": "DLin-MC3-DMA",
+      "D-Lin-MC3-DMA (MC3)": "DLin-MC3-DMA",
+      "DLin MC3 DMA": "DLin-MC3-DMA",
+      "MC3 (DLin-MC3-DMA)": "DLin-MC3-DMA",
+      "MC3 (DLin-MC3-DMA, control)": "DLin-MC3-DMA",
+      "DLin-MC3-DMA (dilinoleyl-methyl-4-dimethylaminobutyrate, Lipid 16)": "DLin-MC3-DMA",
+      "(6Z,9Z,28Z,31Z)-heptatriaconta-6,9,28,31-tetraen-19-yl 4-(dimethylamino)butanoate": "DLin-MC3-DMA",
+      "SM-102": "SM-102",
+      "SM102": "SM-102",
+      "SM 102": "SM-102",
+      "SM-102 (1-octylnonyl 8-[(2-hydroxyethyl)[6-oxo-6-(undecyloxy) hexyl]amino]-octanoate)": "SM-102",
+      "heptadecan-9-yl 8-((2-hydroxyethyl)(6-oxo-6-(undecyloxy)hexyl)amino)octanoate": "SM-102",
+      "ALC-0315": "ALC-0315",
+      "ALC0315": "ALC-0315",
+      "ALC 0315": "ALC-0315",
+      "((4-hydroxybutyl)azanediyl)bis(hexane-6,1-diyl)bis(2-hexyldecanoate)": "ALC-0315",
+      "DLin-KC2-DMA": "DLin-KC2-DMA",
+      "KC2-DMA": "DLin-KC2-DMA",
+      "KC2": "DLin-KC2-DMA",
+      "DLin KC2 DMA": "DLin-KC2-DMA",
+      "DLin-KC2-DMA (KC2)": "DLin-KC2-DMA",
+      "KC2 (DLin-KC2-DMA)": "DLin-KC2-DMA",
+      "DLin-KC2-DMA (2,2-dilinoleyl-4-dimethylaminoethyl-[1,3]-dioxolane))": "DLin-KC2-DMA",
+      "KC2 (2,2-dilinoleyl-4-(2-dimethylaminoethyl)-[1,3]-dioxolane)": "DLin-KC2-DMA",
+      "(2R)-2-({8-[(3β)-cholest-5-en-3-yloxy]octyl}oxy)-N,N-dimethyl-3-[(9Z,12Z)-octadeca-9,12-dien-1-yloxy]propan-1-amine": "DLin-KC2-DMA",
+      "DLinKC2-DMA (2,2-dilinoleyl-4-(2-dimethylaminoethyl)-[1,3]-dioxolane)": "DLin-KC2-DMA",
+      "DOTAP": "DOTAP",
+      "DPTAP": "DOTAP",
+      "1,2-dioleoyl-3-trimethylammonium-propane": "DOTAP",
+      "dioleoyl trimethylammonium propane": "DOTAP",
+      "DOTAP (dioleoyl-3-trimethylammonium propane)": "DOTAP",
+      "DOTAP (N-[1-(2,3-Dioleoyloxy)propyl]-N,N,N-trimethylammonium)": "DOTAP",
+      "DOTMA": "DOTMA",
+      "N-[1-(2,3-dioleyloxy)propyl]-N,N,N-trimethylammonium chloride": "DOTMA",
+      "dioctadecyldimethylammonium": "DOTMA",
+      "DODMA": "DODMA",
+      "DODMA (2)": "DODMA",
+      "DODMA (1,2-dioleyloxy-N,N-dimethyl-3-aminopropane)": "DODMA",
+      "1,2-dioleyl-sn-glycero-3-dimethylammonium": "DODMA",
+      "DPalDMA (3)": "DPalDMA",
+      "DC-Chol": "DC-Chol",
+      "DC-cholesterol": "DC-Chol",
+      "3β-[N-(N',N'-dimethylaminoethane)-carbamoyl]cholesterol": "DC-Chol",
+      "DLinDMA": "DLinDMA",
+      "DLin-DMA": "DLinDMA",
+      "DLinDMA (1)": "DLinDMA",
+      "(Z)-4-(dimethylamino)-2-((Z)-non-2-en-1-yloxy)but-2-enoic acid": "DLinDMA",
+      "DLinDMA (1,2-dilinoleyloxy-3-dimethylaminopropane)": "DLinDMA",
+      "DLinDMA (1,2-dilinoleyloxy-N,N-dimethyl-3-aminopropane)": "DLinDMA",
+      "DSDMA (1,2-distearyloxy-N,N-dimethyl-3-aminopropane)": "DSDMA",
+      "DLenDMA (1,2-dilinolenoyloxy-N,N-dimethyl-3-aminopropane)": "DLenDMA",
+      "DLinDAP": "DLinDAP",
+      "DLin-DAP": "DLinDAP",
+      "DLinDAP (1,2-dilinoleoyl-3-dimethylaminopropane)": "DLinDAP",
+      "C12-200": "C12-200",
+      "C12 - 200": "C12-200",
+      "C12 200": "C12-200",
+      "Lipidoid C12-200": "C12-200",
+      "cKK-E12": "cKK-E12",
+      "cKK E12": "cKK-E12",
+      "cKK-E12 (MD-1)": "cKK-E12",
+      "Lipidoid cKK-E12": "cKK-E12",
+      "L319": "L319",
+      "L-319": "L319",
+      "Lipid 319": "L319",
+      "L319 (Di((Z)-non-2-en-1-yl) 9-((4-(dimethylamino)butanoyl)oxy)heptadecanedioate)": "L319",
+      "L343 ((9Z,28Z)-di-tert-butyl 19-((4-(dimethylamino)butanoyl)oxy)heptatriaconta-9,28-dienedioate)": "L343",
+      "Heptadecan-9-yl 8-((3-hydroxypropyl)(8-(nonyloxy)-8-oxooctyl)amino)octanoate": "BP-Lipid-135",
+      "A1": "A1",
+      "A2": "A2",
+      "A3": "A3",
+      "A4": "A4",
+      "A5": "A5",
+      "A6": "A6",
+      "306O6": "306O6",
+      "306O8": "306O8",
+      "306O9": "306O9",
+      "306O10": "306O10",
+      "306O11": "306O11",
+      "306O12": "306O12",
+      "306O13": "306O13",
+      "306O14": "306O14",
+      "306O16": "306O16",
+      "306O18": "306O18",
+      "306Oi10": "306Oi10",
+      "200O10": "200O10",
+      "200Oi10": "200Oi10",
+      "304O10": "304O10",
+      "304Oi10": "304Oi10",
+      "9A1P9": "9A1P9",
+      "9A1P15": "9A1P15",
+      "10A1P10": "10A1P10",
+      "10A1P16": "10A1P16",
+      "A2-Iso5-2DC18 (ethyl 5,5-di((Z)-heptadec-8-en-1-yl)-1-(3-(pyrrolidin-1-yl)propyl)-2,5-dihydro-1H-imidazole-2-carboxylate)": "A2-Iso5-2DC18",
+      "A12-Iso5-2DC18 (ethyl 1-(3-(dimethylamino)propyl)-5,5-di((Z)-heptadec-8-en-1-yl)-2,5-dihydro-1H-imidazole-2-carboxylate)": "A12-Iso5-2DC18",
+      "A18-Iso5-2DC18 (ethyl 1-(3-(2-ethylpiperidin-1-yl)propyl)-5,5-di((Z)-heptadec-8-en-1-yl)-2,5-dihydro-1H-imidazole-2-carboxylate)": "A18-Iso5-2DC18",
+      "A13-Iso5-2DC18 (ethyl 5,5-di((Z)-heptadec-8-en-1-yl)-1-(3-(piperidin-1-yl)propyl)-2,5-dihydro-1H-imidazole-2-carboxylate)": "A13-Iso5-2DC18",
+      "A17-Iso5-2DC18 (ethyl 1-(3-(5-ethyl-2-methylpiperidin-1-yl)propyl)-5,5-di((Z)-heptadec-8-en-1-yl)-2,5-dihydro-1H-imidazole-2-carboxylate)": "A17-Iso5-2DC18",
+      "A21-Iso5-2DC18 (ethyl 1-(3-(azepan-1-yl)propyl)-5,5-di((Z)-heptadec-8-en-1-yl)-2,5-dihydro-1H-imidazole-2-carboxylate)": "A21-Iso5-2DC18",
+      "A24-Iso5-2DC18 (ethyl 1-(3-(diethylamino)propyl)-5,5-di((Z)-heptadec-8-en-1-yl)-2,5-dihydro-1H-imidazole-2-carboxylate)": "A24-Iso5-2DC18",
+      "A25-Iso5-2DC18 (ethyl 1-(3-(dibutylamino)propyl)-5,5-di((Z)-heptadec-8-en-1-yl)-2,5-dihydro-1H-imidazole-2-carboxylate)": "A25-Iso5-2DC18",
+      "A26-Iso5-2DC18 (ethyl 1-(3-(dipropylamino)propyl)-5,5-di((Z)-heptadec-8-en-1-yl)-2,5-dihydro-1H-imidazole-2-carboxylate)": "A26-Iso5-2DC18",
+      "C14-110": "C14-110",
+      "C16-96": "C16-96",
+      "C14-100": "C14-100",
+      "C12-113": "C12-113",
+      "C14-96": "C14-96",
+      "C18-96": "C18-96",
+      "cKK-A12": "cKK-A12",
+      "cKK-O12": "cKK-O12",
+      "AE-00": "AE-00",
+      "AE-01": "AE-01",
+      "AE-02": "AE-02",
+      "AE-03": "AE-03",
+      "OF-00": "OF-00",
+      "OF-01": "OF-01",
+      "OF-02": "OF-02",
+      "OF-03": "OF-03",
+      "C245C10": "C245C10",
+      "C246C10": "C246C10",
+      "FTT1": "FTT1",
+      "FTT2": "FTT2",
+      "FTT3": "FTT3",
+      "FTT4": "FTT4",
+      "FTT5": "FTT5",
+      "FTT6": "FTT6",
+      "FTT7": "FTT7",
+      "FTT8": "FTT8",
+      "FTT9": "FTT9",
+      "FTT10": "FTT10",
+      "H1": "H1",
+      "H2": "H2",
+      "H3": "H3",
+      "H4": "H4",
+      "H5": "H5",
+      "H6": "H6",
+      "H7": "H7",
+      "H8": "H8",
+      "H9": "H9",
+      "H10": "H10",
+      "H11": "H11",
+      "H12": "H12",
+      "H13": "H13",
+      "H14": "H14",
+      "H15": "H15",
+      "H31": "H31",
+      "H32": "H32",
+      "H33": "H33",
+      "H34": "H34",
+      "H35": "H35",
+      "H36": "H36",
+      "H37": "H37",
+      "H38": "H38",
+      "H39": "H39",
+      "H40": "H40",
+      "H41": "H41",
+      "H42": "H42",
+      "H43": "H43",
+      "H44": "H44",
+      "H45": "H45",
+      "DMA-Lin-Oct-Chol": "DMA-Lin-Oct-Chol",
+      "DMA-Lin-But-Chol": "DMA-Lin-But-Chol",
+      "Mor-Lin-But-Chol": "Mor-Lin-But-Chol",
+      "Pyr-Lin-But-Chol": "Pyr-Lin-But-Chol",
+      "DMA-Ole-Hex-Chol": "DMA-Ole-Hex-Chol",
+      "DEA-Ole-Hex-Chol": "DEA-Ole-Hex-Chol",
+      "MPyr-Ole-Hex-Chol": "MPyr-Ole-Hex-Chol",
+      "FPip-Ole-Hex-Chol": "FPip-Ole-Hex-Chol",
+      "Pyr-Ole-Hex-Chol": "Pyr-Ole-Hex-Chol",
+      "Pip-Ole-Hex-Chol": "Pip-Ole-Hex-Chol",
+      "Mor-Ole-Hex-Chol": "Mor-Ole-Hex-Chol",
+      "Imi-Ole-Hex-Chol": "Imi-Ole-Hex-Chol",
+      "BA-Ole-Hex-Chol": "BA-Ole-Hex-Chol",
+      "MPz-Ole-Hex-Chol": "MPz-Ole-Hex-Chol",
+      "BP-114": "BP-114",
+      "BP-113": "BP-113",
+      "BP-142": "BP-142",
+      "BP-223": "BP-223",
+      "BP-226": "BP-226",
+      "BP-227": "BP-227",
+      "MDOA": "MDOA",
+      "DODAP": "DODAP",
+      "5A2-SC8": "5A2-SC8",
+      "DDAB": "DDAB",
+      "7C1 (PEI600 conjugated with C15 epoxide-terminated lipids at 1:14 molar ratio)": "7C1",
+      "DSPC": "DSPC",
+      "1,2-distearoyl-sn-glycero-3-phosphocholine": "DSPC",
+      "distearoylphosphatidylcholine": "DSPC",
+      "DOPE": "DOPE",
+      "1,2-dioleoyl-sn-glycero-3-phosphoethanolamine": "DOPE",
+      "dioleoylphosphatidylethanolamine": "DOPE",
+      "DOPC": "DOPC",
+      "1,2-dioleoyl-sn-glycero-3-phosphocholine": "DOPC",
+      "dioleoylphosphatidylcholine": "DOPC",
+      "DPPC": "DPPC",
+      "1,2-dipalmitoyl-sn-glycero-3-phosphocholine": "DPPC",
+      "dipalmitoylphosphatidylcholine": "DPPC",
+      "1,2-dipalmitoyl-sn-glycero-3-phosphoethanolamine": "DPPE",
+      "dipalmitoylphosphatidylethanolamine": "DPPE",
+      "DSPE": "DSPE",
+      "1,2-distearoyl-sn-glycero-3-phosphoethanolamine": "DSPE",
+      "distearoylphosphatidylethanolamine": "DSPE",
+      "DMPE": "DMPE",
+      "1,2-dimyristoyl-sn-glycero-3-phosphoethanolamine": "DMPE",
+      "dimyristoylphosphatidylethanolamine": "DMPE",
+      "sphingomyelin": "sphingomyelin",
+      "egg PC": "egg-PC",
+      "soy PC": "soy-PC",
+      "POPC": "POPC",
+      "16:0-18:1 PC": "POPC",
+      "POPE": "POPE",
+      "DLPC": "DLPC",
+      "DLPE": "DLPE",
+      "cholesterol": "cholesterol",
+      "CHOL": "cholesterol",
+      "Chol": "cholesterol",
+      "cholesterol (only)": "cholesterol",
+      "cholest-5-en-3β-ol": "cholesterol",
+      "(3S,8S,9S,10R,13R,14S,17R)-10,13-dimethyl-17-((R)-6-methylheptan-2-yl)-2,3,4,7,8,9,10,11,12,13,14,15,16,17-tetradecahydro-1H-cyclopenta[a]phenanthren-3-ol": "cholesterol",
+      "cholesterol analog": "cholesterol",
+      "sitosterol": "sitosterol",
+      "stigmasterol": "stigmasterol",
+      "ergosterol": "ergosterol"
+    };
+
+    const STATIC_SMILES_LIBRARY = {
+      "DMG-PEG2000": "CCCCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)OC(=O)CCCCCCCCCCCCC",
+      "C14-PEG2000": "CCCCCCCCCCCCCCOC(=O)CCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO",
+      "C14-PEG3000": "CCCCCCCCCCCCCCOC(=O)CCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO",
+      "C14-PEG1000": "CCCCCCCCCCCCCCOC(=O)CCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO",
+      "C16-PEG2000": "CCCCCCCCCCCCCCCCOC(=O)CCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO",
+      "C16-PEG1000": "CCCCCCCCCCCCCCCCOC(=O)CCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO",
+      "C18-PEG2000": "CCCCCCCCCCCCCCCCCCOC(=O)CCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO",
+      "C18-PEG1000": "CCCCCCCCCCCCCCCCCCOC(=O)CCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO",
+      "C18-PEG3000": "CCCCCCCCCCCCCCCCCCOC(=O)CCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO",
+      "DSPE-PEG2000": "CCCCCCCCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCCN[C@@H](CO)C(=O)NCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)OC(=O)CCCCCCCCCCCCCCCCC",
+      "DMPE-PEG2000": "CCCCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCCN[C@@H](CO)C(=O)NCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)OC(=O)CCCCCCCCCCCCC",
+      "DMPE-PEG1000": "CCCCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCCN[C@@H](CO)C(=O)NCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)OC(=O)CCCCCCCCCCCCC",
+      "DMPE-PEG550": "CCCCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCCN[C@@H](CO)C(=O)NCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)OC(=O)CCCCCCCCCCCCC",
+      "C16-Ceramide-PEG2000": "CCCCCCCCCCCCCCCC(=O)NC(COP(=O)([O-])OCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)C(O)C=CCCCCCCCCCCCC",
+      "C8-Ceramide-PEG2000": "CCCCCCCC(=O)NC(COP(=O)([O-])OCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)C(O)C=CCCCCCCCCCCCC",
+      "C20-Ceramide-PEG2000": "CCCCCCCCCCCCCCCCCCCC(=O)NC(COP(=O)([O-])OCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)C(O)C=CCCCCCCCCCCCC",
+      "C16-Ceramide-PEG750": "CCCCCCCCCCCCCCCC(=O)NC(COP(=O)([O-])OCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)C(O)C=CCCCCCCCCCCCC",
+      "C8-Ceramide-PEG750": "CCCCCCCC(=O)NC(COP(=O)([O-])OCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)C(O)C=CCCCCCCCCCCCC",
+      "DSG-PEG2000": "CCCCCCCCCCCCCCCCCC(=O)OCC(COC(=O)CCCCCCCCCCCCCCCCC)OP(=O)([O-])OCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO",
+      "PE-PEG2000": "CCCCCCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCCN[C@@H](CO)C(=O)NCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)OC(=O)CCCCCCCCCCCCCCC",
+      "DPPE-PEG2000": "CCCCCCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCCN[C@@H](CO)C(=O)NCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)OC(=O)CCCCCCCCCCCCCCC",
+      "DPPE-PEG1000": "CCCCCCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCCN[C@@H](CO)C(=O)NCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)OC(=O)CCCCCCCCCCCCCCC",
+      "DOPE-PEG2000": "CCCCCCCCC=CCCCCCCC(=O)OCC(COP(=O)([O-])OCCN[C@@H](CO)C(=O)NCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)OC(=O)CCCCCCC=CCCCCCCCC",
+      "DOPE-PEG1000": "CCCCCCCCC=CCCCCCCC(=O)OCC(COP(=O)([O-])OCCN[C@@H](CO)C(=O)NCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)OC(=O)CCCCCCC=CCCCCCCCC",
+      "DOPE-PEG550": "CCCCCCCCC=CCCCCCCC(=O)OCC(COP(=O)([O-])OCCN[C@@H](CO)C(=O)NCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO)OC(=O)CCCCCCC=CCCCCCCCC",
+      "ALC-0159": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCN(CCCCCCCCCC(=O)OC)CC(O)COC(=O)CCCCCCCCC",
+      "PEG-c-DMA": "CN(C)CCC(O)COCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO",
+      "PEG-s-DMG": "CCCCCCCCCCCCCC(=O)SCCOC(=O)CCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO",
+      "PEG-lipid": "CCCCCCCCCCCCCCCCOC(=O)CCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCOCCO",
+      "SM-102": "CCCCCCCCCCCOC(=O)CCCCCN(CCCCCCCC(=O)OC(CCCCCCCC)CCCCCCCC)CCO",
+      "ALC-0315": "CCCCCCCCC(CCCCCC)C(=O)OCCCCCCN(CCCCCCOC(=O)C(CCCCCC)CCCCCCCC)CCCCO",
+      "DLin-MC3-DMA": "CCCCC/C=C\\C/C=C\\CCCCCCCCC(OC(=O)CCCN(C)C)CCCCCCCC/C=C\\C/C=C\\CCCCC",
+      "DLin-KC2-DMA": "CCCCC/C=C\\C/C=C\\CCCCCCCCC1(OC(CO1)CCN(C)C)CCCCCCCC/C=C\\C/C=C\\CCCCC",
+      "DLinDMA": "CCCCC/C=C\\C/C=C\\CCCCCCCCOCC(CN(C)C)OCCCCCCCC/C=C\\C/C=C\\CCCCC",
+      "DLinDAP": "CCCCC/C=C\\C/C=C\\CCCCCCCC(=O)OCC(CN(C)C)OC(=O)CCCCCCC/C=C\\C/C=C\\CCCCC",
+      "DMAP-BLP": "CCCCC/C=C\\C/C=C\\CCCCCCCCC(CC(=O)OCCCN(C)C)CCCCCCCC/C=C\\C/C=C\\CCCCC",
+      "DOTAP": "CCCCCCCC/C=C\\CCCCCCCC(=O)OCC(C[N+](C)(C)C)OC(=O)CCCCCCC/C=C\\CCCCCCCC",
+      "DOTMA": "CCCCCCCC/C=C\\CCCCCCCCOCC(C[N+](C)(C)C)OCCCCCCCC/C=C\\CCCCCCCC.[Cl-]",
+      "DODMA": "CCCCCCCC/C=C\\CCCCCCCCOCC(CN(C)C)OCCCCCCCC/C=C\\CCCCCCCC",
+      "DODAP": "CCCCCCCC/C=C\\CCCCCCCC(=O)OCC(COC(=O)CCCCCCC/C=C\\CCCCCCCC)CN(C)C",
+      "DSDMA": "CCCCCCCCCCCCCCCCCCOCC(CN(C)C)OCCCCCCCCCCCCCCCCCC",
+      "DODAC": "CCCCCCCC/C=C\\CCCCCCCC[N+](CCCCCCCC/C=C\\CCCCCCCC)(C)C.[Cl-]",
+      "DLenDMA": "CC/C=C\\C/C=C\\C/C=C\\CCCCCCCCOCC(CN(C)C)OCCCCCCCC/C=C\\C/C=C\\C/C=C\\CC",
+      "L319": "CCCCCC/C=C\\COC(=O)CCCCCCCC(OC(=O)CCCN(C)C)CCCCCCCC(=O)OC/C=C\\CCCCCC",
+      "L322": "COC(=O)CCCCCCC/C=C\\CCCCCCCCCC(OC(=O)CCCN(C)C)CCCCCCCCCC/C=C\\CCCCCCC(=O)OC",
+      "L354": "CCCCCCCCCCC/C=C\\COC(=O)CCCC(OC(=O)CCCN(C)C)CCCC(=O)OC/C=C\\CCCCCCCCCC",
+      "L356": "CCCCCCCCC/C=C\\COC(=O)CCCCCC(OC(=O)CCCN(C)C)CCCCCC(=O)OC/C=C\\CCCCCCCCC",
+      "L357": "CCCCCCC/C=C\\COC(=O)CCCCCCCCCC(OC(=O)CCCN(C)C)CCCCCCCCCC(=O)OC/C=C\\CCCCCCC",
+      "L343": "CC(OC(=O)CCCCCCC/C=C\\CCCCCCCCC(OC(=O)CCCN(C)C)CCCCCCCC/C=C\\CCCCCCCC(=O)OC(C)(C)C)(C)C",
+      "9A1P9": "CCCCCCCCCOP(=O)(O)OCCN(CCCCCCCC)CCCCCCCC",
+      "L202": "CCCCCCCCCCC(CCCCCCCCC(=O)OCCC(CCCCC)CCCCC)COC(=O)C1CCN(CC1)C",
+      "DLin-2-DMAP": "CCCCC/C=C\\C/C=C\\CCCCCCCOC(CN(C)C)COC(=O)CCCCCCC/C=C\\C/C=C\\CCCCC",
+      "DLin-C-DAP": "CCCCC/C=C\\C/C=C\\CCCCCCCCNC(=O)OCC(CN(C)C)OC(=O)NCCCCCCCC/C=C\\C/C=C\\CCCCC",
+      "DLin-S-DMA": "CCCCC/C=C\\C/C=C\\CCCCCCCCSCC(CN(C)C)SCCCCCCCC/C=C\\C/C=C\\CCCCC",
+      "DLin-K-DMA": "CCCCCCC=CCC=CCCCCCCCOCC(COC(=O)CCC=CCC=CCCCCCCCC)CN(C)C",
+      "DLin-K-MPZ": "CCCCCCC=CCC=CCCCCCCCOCC(COC(=O)CCC=CCC=CCCCCCCCC)CN1CCN(C)CC1",
+      "DLin-K-MA": "CCCCCCC=CCC=CCCCCCCCOCC(COC(=O)CCC=CCC=CCCCCCCCC)CN1CCOCC1",
+      "DLin-K-TMA.Cl": "CCCCCCC=CCC=CCCCCCCCOCC(COC(=O)CCC=CCC=CCCCCCCCC)C[N+](C)(C)C.[Cl-]",
+      "DLin-K2-DMA": "CCCCCCC=CCC=CCCCCCCCOCC(COC(=O)CCC=CCC=CCCCCCCCC)CC(=O)CN(C)C",
+      "DLin-KC3-DMA": "CCCCC/C=C\\C/C=C\\CCCCCCCCC1(OC(CO1)CCCN(C)C)CCCCCCCC/C=C\\C/C=C\\CCCCC",
+      "DLin-KC4-DMA": "CCCCCCC=CCC=CCCCCCCCOCC(COC(=O)CCC=CCC=CCCCCCCCC)CCCC(=O)CN(C)C",
+      "BP-114": "CCCCCCCCCCCCCCCC(=O)N(CCCCCCCCCCCCCCO)CCCCCCCCC(=O)OCC/C=C/C=C/C=C/CCCCCCCC",
+      "BP-113": "CCCCCCCCCCCCCCCC(=O)N(CCCCCCCCCCCCCCO)CCCCCCCCCCCC(=O)OCC/C=C/C=C/CCCCCC",
+      "BP-142": "CCCCCCCCCCCCCCCCC(=O)N(CCCCCCCCCCCCCCO)CCCCCCCCCCCC(=O)OCC/C=C/C=C/CCCCCCCC",
+      "BP-223": "CCCCCCCCCCCCCCCC(=O)N(CCCCCCCCCCCCCCO)CCCCCCCCCCCCCC(=O)OCC/C=C/C=C/C=C/CCCCCCCC",
+      "BP-226": "CCCCCCCCCCCCCCCC(=O)N(CCCCCCCCCCCCCCO)CCCCCCCCCCCCCC(=O)OCC/C=C/C=C/CCCCCC",
+      "BP-227": "CCCCCCCCCCCCCCCC(=O)N(CCCCCCCCCCCCCCO)CCCCCCCCC(=O)OCC(/C=C/C=C/C=C/C=C/C=C/CCCC)C(=O)OCC/C=C/C=C/C=C/C=C/C=C/CCCC",
+      "306O6": "CCCCCCOC(=O)CCN(CCCN(C)CCCN(CCC(=O)OCCCCCC)CCC(=O)OCCCCCC)CCC(=O)OCCCCCC",
+      "306O8": "CCCCCCCCOC(=O)CCN(CCCN(C)CCCN(CCC(=O)OCCCCCCCC)CCC(=O)OCCCCCCCC)CCC(=O)OCCCCCCCC",
+      "306O9": "CCCCCCCCC(OC(=O)CCN(CCCN(C)CCCN(CCC(=O)OCCCCCCCCC)CCC(=O)OCCCCCCCCC)CCC(=O)OCCCCCCCCC)",
+      "306Oi10": "CCCCCCCC(C)COC(=O)CCN(CCCN(C)CCCN(CCC(=O)OCC(C)CCCCCCCC)CCC(=O)OCC(C)CCCCCCCC)CCC(=O)OCC(C)CCCCCCCC",
+      "306O10": "CCCCCCCCCCOC(=O)CCN(CCCN(C)CCCN(CCC(=O)OCCCCCCCCCC)CCC(=O)OCCCCCCCCCC)CCC(=O)OCCCCCCCCCC",
+      "306O11": "CCCCCCCCCCCOC(=O)CCN(CCCN(C)CCCN(CCC(=O)OCCCCCCCCCCC)CCC(=O)OCCCCCCCCCCC)CCC(=O)OCCCCCCCCCCC",
+      "306O12": "CCCCCCCCCCCOC(=O)CCN(CCCN(C)CCCN(CCC(=O)OCCCCCCCCCCCC)CCC(=O)OCCCCCCCCCCCC)CCC(=O)OCCCCCCCCCCCC",
+      "306O13": "CCCCCCCCCCCCCOC(=O)CCN(CCCN(C)CCCN(CCC(=O)OCCCCCCCCCCCCC)CCC(=O)OCCCCCCCCCCCCC)CCC(=O)OCCCCCCCCCCCCC",
+      "306O14": "CCCCCCCCCCCCCCOC(=O)CCN(CCCN(C)CCCN(CCC(=O)OCCCCCCCCCCCCCC)CCC(=O)OCCCCCCCCCCCCCC)CCC(=O)OCCCCCCCCCCCCCC",
+      "306O16": "CCCCCCCCCCCCCCCCOC(=O)CCN(CCCN(C)CCCN(CCC(=O)OCCCCCCCCCCCCCCCC)CCC(=O)OCCCCCCCCCCCCCCCC)CCC(=O)OCCCCCCCCCCCCCCCC",
+      "306O18": "CCCCCCCCCCCCCCCCCCOC(=O)CCN(CCCN(C)CCCN(CCC(=O)OCCCCCCCCCCCCCCCCCC)CCC(=O)OCCCCCCCCCCCCCCCCCC)CCC(=O)OCCCCCCCCCCCCCCCCCC",
+      "200Oi10": "CCCCCCCC(C)COC(=O)CCN1CCN(CCNCCN(CCC(=O)OCC(C)CCCCCCCC)CCC(=O)OCC(C)CCCCCCCC)CC1",
+      "200O10": "CCCCCCCCCCOC(=O)CCN1CCN(CCNCCN(CCC(=O)OCCCCCCCCCC)CCC(=O)OCCCCCCCCCC)CC1",
+      "304Oi10": "CCCCCCCC(C)COC(=O)CCN(C)CCN(CCNCCN(CCC(=O)OCC(C)CCCCCCCC)CCC(=O)OCC(C)CCCCCCCC)CCN(C)CCC(=O)OCC(C)CCCCCCCC",
+      "304O10": "CCCCCCCCCCOC(=O)CCN(C)CCN(CCNCCN(CCC(=O)OCCCCCCCCCC)CCC(=O)OCCCCCCCCCC)CCN(C)CCC(=O)OCCCCCCCCCC",
+      "A2-Iso5-2DC18": "CCCCCCCC/C=C\\CCCCCCCC1(N(C(N=C1)C(=O)OCC)CCCN2CCCC2)CCCCCCC/C=C\\CCCCCCCC",
+      "A12-Iso5-2DC18": "CCCCCCCC/C=C\\CCCCCCCC1(N(C(N=C1)C(=O)OCC)CCCN(C)C)CCCCCCC/C=C\\CCCCCCCC",
+      "A18-Iso5-2DC18": "CCCCCCCC/C=C\\CCCCCCCC1(N(C(N=C1)C(=O)OCC)CCCN2C(CCCC2)CC)CCCCCCC/C=C\\CCCCCCCC",
+      "A13-Iso5-2DC18": "CCOC(=O)C1=NC(CCCCCCCCC=CCCCCCCCC)(CCCCCCCCC=CCCCCCCCC)CN1CCCN1CCCCC1",
+      "A17-Iso5-2DC18": "CCOC(=O)C1=NC(CCCCCCCCC=CCCCCCCCC)(CCCCCCCCC=CCCCCCCCC)CN1CCCN1CC(C)CCC1CC",
+      "A21-Iso5-2DC18": "CCOC(=O)C1=NC(CCCCCCCCC=CCCCCCCCC)(CCCCCCCCC=CCCCCCCCC)CN1CCCN1CCCCCC1",
+      "A24-Iso5-2DC18": "CCOC(=O)C1=NC(CCCCCCCCC=CCCCCCCCC)(CCCCCCCCC=CCCCCCCCC)CN1CCCN(CC)CC",
+      "A25-Iso5-2DC18": "CCOC(=O)C1=NC(CCCCCCCCC=CCCCCCCCC)(CCCCCCCCC=CCCCCCCCC)CN1CCCN(CCCC)CCCC",
+      "A26-Iso5-2DC18": "CCOC(=O)C1=NC(CCCCCCCCC=CCCCCCCCC)(CCCCCCCCC=CCCCCCCCC)CN1CCCN(CCC)CCC",
+      "C9-200": "CCCCCCCC(O)CN(CCN1CCN(CCN(CC(O)CCCCCCC)CC(O)CCCCCCC)CC1)CCN(CC(O)CCCCCCC)CC(O)CCCCCCC",
+      "C10-200": "OC(CN(CCN1CCN(CC1)CCN(CC(O)CCCCCCCC)CC(O)CCCCCCCC)CCN(CC(O)CCCCCCCC)CC(O)CCCCCCCC)CCCCCCCC",
+      "C12-200": "NCCN1CCN(CCN(CC(O)CCCCCCCCCCCC)CC(O)CCCCCCCCCCCC)CC1CN(CC(O)CCCCCCCCCCCC)CN(CC(O)CCCCCCCCCCCC)CC(O)CCCCCCCCCCCC",
+      "C14-110": "N(CC(O)CCCCCCCCCCCCCC)CCN(CN)CCN(CC(O)CCCCCCCCCCCCCC)CC(O)CCCCCCCCCCCCCC",
+      "C16-96": "N(CC(O)CCCCCCCCCCCCCCCC)CCN(CC(O)CCCCCCCCCCCCCCCC)CC(O)CCCCCCCCCCCCCCCC",
+      "C14-100": "N(CC(O)CCCCCCCCCCCCCC)CCN(CC(O)CCCCCCCCCCCCCC)CC(O)CCCCCCCCCCCCCC",
+      "C12-113": "N(CC(O)CCCCCCCCCCCC)CCN(CCN(CC(O)CCCCCCCCCCCC)CC(O)CCCCCCCCCCCC)CCN(CC(O)CCCCCCCCCCCC)CC(O)CCCCCCCCCCCC",
+      "C14-96": "N(CC(O)CCCCCCCCCCCCCC)CCN(CC(O)CCCCCCCCCCCCCC)CC(O)CCCCCCCCCCCCCC",
+      "C18-96": "N(CC(O)CCCCCCCCCCCCCCCCCC)CCN(CC(O)CCCCCCCCCCCCCCCCCC)CC(O)CCCCCCCCCCCCCCCCCC",
+      "cKK-E12": "CCCCCCCCCCCC(O)CN1CCCCC(C(=O)NC2CCCCCNC(=O)C3N(CC(O)CCCCCCCCCCCC)CCC(CC3)N(CC(O)CCCCCCCCCCCC)CC(O)CCCCCCCCCCCC)C1",
+      "cKK-A12": "CCCCCCCCCCCCN1CCCCC(C(=O)NC2CCCCCNC(=O)C3N(CCCCCCCCCCCC)CCC(CC3)N(CCCCCCCCCCCC)CCCCCCCCCCCC)C1",
+      "cKK-O12": "CCCCCCCCCCCCOC(=O)CN1CCCCC(C(=O)NC2CCCCCNC(=O)C3N(CC(=O)OCCCCCCCCCCCC)CCC(CC3)N(CC(=O)OCCCCCCCCCCCC)CC(=O)OCCCCCCCCCCCC)C1",
+      "AE-00": "CCCCCCCCC/C=C\\CCCCCCC1CO1",
+      "AE-01": "CCCCCCCCC/C=C/CCCCCCC1CO1",
+      "AE-02": "CCCCCC/C=C\\C/C=C\\CCCCCCC1CO1",
+      "AE-03": "CCC/C=C\\C/C=C\\C/C=C\\CCCCCCC1CO1",
+      "OF-00": "CCCCCCCCC/C=C\\CCCCCCCC(O)CN1C(=O)C(CCCCN(CC(O)CCCCCCC/C=C\\CCCCCCCCC)CC(O)CCCCCCC/C=C\\CCCCCCCCC)NC(=O)C(CCCCN(CC(O)CCCCCCC/C=C\\CCCCCCCCC)CC(O)CCCCCCC/C=C\\CCCCCCCCC)N1",
+      "OF-01": "CCCCCCCCC/C=C/CCCCCCCC(O)CN1C(=O)C(CCCCN(CC(O)CCCCCCC/C=C/CCCCCCCCC)CC(O)CCCCCCC/C=C/CCCCCCCCC)NC(=O)C(CCCCN(CC(O)CCCCCCC/C=C/CCCCCCCCC)CC(O)CCCCCCC/C=C/CCCCCCCCC)N1",
+      "OF-02": "CCCCC/C=C\\C/C=C\\CCCCCCC(O)CN(CC(O)CCCCCC/C=C\\C/C=C\\CCCCC)CCCCC1NC(=O)C(NC1=O)CCCCN(CC(O)CCCCCC/C=C\\C/C=C\\CCCCC)CC(O)CCCCCC/C=C\\C/C=C\\CCCCC",
+      "OF-03": "CCC/C=C\\C/C=C\\C/C=C\\CCCCCCCC(O)CN1C(=O)C(CCCCN(CC(O)CCCCCCC/C=C\\C/C=C\\C/C=C\\CCC)CC(O)CCCCCCC/C=C\\C/C=C\\C/C=C\\CCC)NC(=O)C(CCCCN(CC(O)CCCCCCC/C=C\\C/C=C\\C/C=C\\CCC)CC(O)CCCCCCC/C=C\\C/C=C\\C/C=C\\CCC)N1",
+      "OF-Deg-Lin": "CCCCC/C=C\\C/C=C\\CCCCCCCC(=O)OCCN(CCOC(=O)CCCCCCC/C=C\\C/C=C\\CCCCC)CCCCC1NC(=O)C(NC1=O)CCCCN(CCOC(=O)CCCCCCC/C=C\\C/C=C\\CCCCC)CCOC(=O)CCCCCCC/C=C\\C/C=C\\CCCCC",
+      "OF-C4-Deg-Lin": "CCCCC/C=C\\C/C=C\\CCCCCCCC(=O)OCCCCN(CCCCOC(=O)CCCCCCC/C=C\\C/C=C\\CCCCC)CCCC[C@@H]1NC(=O)[C@@H](NC1=O)CCCCN(CCCCOC(=O)CCCCCCC/C=C\\C/C=C\\CCCCC)CCCCOC(=O)CCCCCCC/C=C\\C/C=C\\CCCCC",
+      "245C10": "CCCCCCCCCC(O)CN(CC(O)CCCCCCCCCC)CCCN1CCN(CC(O)CCCCCCCCCC)CC1CC(O)CCCCCCCCCC",
+      "246C10": "CCCCCCCCCCC(CN(CCCN1CCN(CC1)CCCN(CC(CCCCCCCCCC)O)CC(CCCCCCCCCC)O)CC(CCCCCCCCCC)O)O",
+      "DC-Chol": "CC(C)CCCC(C)C1CCC2C3CC=C4CC(O)CCC4(C)C3CCC12C.C[N+](C)(C)CCC(O)CO",
+      "9A1P15": "CCCCCCCC[N+](CCCC)(CCO[P-](=O)OCCCCCCCCCCCCCCC)CCO[P-](=O)OCCCCCCCCCCCCCCC",
+      "10A1P10": "CCCCCCCCC[N+](CCCC)(CCO[P-](=O)OCCCCCCCCCC)CCO[P-](=O)OCCCCCCCCCC",
+      "10A1P16": "CCCCCCCCC[N+](CCCC)(CCO[P-](=O)OCCCCCCCCCCCCCCCC)CCO[P-](=O)OCCCCCCCCCCCCCCCC",
+      "AX4": "O=C(CCN(CCCN(CCCN(CCC(OCCCCOC(C(CCCCCC)CCCC)=O)=O)CCC(OCCCCOC(C(CCCCCC)CCCC)=O)=O)C)CCC(OCCCCOC(C(CCCCCC)CCCC)=O)=O)OCCCCOC(C(CCCCCC)CCCC)=O",
+      "7C1": "NCCN(CCNCC(O)CCCCCCCCCCCC)CCNCCN(CCNCCNCC(O)CCCCCCCCCCCC)CCN(CCN(CCN)CCNCC(O)CCCCCCCCCCCC)CCNCCN",
+      "YSK05": "CN1CCC(OCCCCCCCC/C=C\\C/C=C\\CCCCC)(OCCCCCCCC/C=C\\C/C=C\\CCCCC)CC1",
+      "4A3-SC8": "O=C(CCN(CCCN(CCCN(CCC(OCCOC(C(CSCCCCCCCC)C)=O)=O)CCC(OCCOC(C(CSCCCCCCCC)C)=O)=O)C)CCC(OCCOC(C(CSCCCCCCCC)C)=O)=O)OCCOC(C(CSCCCCCCCC)C)=O",
+      "98N12-5": "CCCCCCCCCCCCNC(CCN(CCN(CCC(NCCCCCCCCCCCC)=O)CCC(NCCCCCCCCCCCC)=O)CCNCCN(CCC(NCCCCCCCCCCCC)=O)CCC(NCCCCCCCCCCCC)=O)=O",
+      "244-cis": "CCCCCC/C=C\\COC(=O)CCCCCCCCN1CCN(CC1)CCN(CCCCCCCCC(=O)OC/C=C\\CCCCCC)CCCCCCCCC(=O)OC/C=C\\CCCCCC",
+      "ZA3-Ep10": "CCCCCCCCC(CN(CCC(=O)NCC[N+](C)(C)CCCS(=O)(=O)[O-])CCN(CCN(CC(CCCCCCCC)O)CC(CCCCCCCC)O)CCN(CC(CCCCCCCC)O)CC(CCCCCCCC)O)O",
+      "BP-Lipid-135": "CCCCCCCCCOC(=O)CCCCCCCN(CCCCCCCC(=O)OC(CCCCCCCC)CCCCCCCC)CCCO",
+      "A1": "CN(C)CCCC(=O)OC(CCCCCCCC(=O)OCC#CCCCCC)COC(=O)CCCCCCCC(=O)OCC#CCCCCC",
+      "A2": "CN(C)CCCC(=O)OC(CCCCCCCC(=O)OCC#CCCCCCC)COC(=O)CCCCCCCC(=O)OCC#CCCCCCC",
+      "A3": "CN(C)CCCC(=O)OC(CCCCCCCC(=O)OCC#CCCCCCCC)COC(=O)CCCCCCCC(=O)OCC#CCCCCCCC",
+      "A4": "CN(C)CCCC(=O)OC(CCCCCCCC(=O)OCCC#CCCCC)COC(=O)CCCCCCCC(=O)OCCC#CCCCC",
+      "A5": "CN(C)CCCC(=O)OC(CCCCCCCC(=O)OCCC#CCCCCC)COC(=O)CCCCCCCC(=O)OCCC#CCCCCC",
+      "A6": "CN(C)CCCC(=O)OC(CCCCCCCC(=O)OCCC#CCCCCCC)COC(=O)CCCCCCCC(=O)OCCC#CCCCCCC",
+      "H1": "CCCCCCCCC/C=C/CCCCCCCCC(=O)N(N)CCCCCCCCCC",
+      "H2": "CCCCCC(C)CCCC(=O)OCCC(N(C)N)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H3": "CCCCCCC/C=C/CCCCCCCCC(N(C)N)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H4": "CCCCCC(C)CCCC(=O)OCCC(NCCCCN(CCCC)CCCCC)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H5": "CCCCCCCCC/C=C/CCCCCCCCC(NCCCCN(CCCC)CCCCCC)C(=O)NCCCCCCCCCCCCCC",
+      "H6": "CCCCCCCC/C=C/C(=O)OCCC(NCCCCN(CCCC)CCCCCC)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H7": "CCCCCC(C)CCCC(=O)OCCC(NN1CCCCCC1)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H8": "CCCCCCCC/C=C/C(=O)OCCC(NN1CCCCCC1)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H9": "CCCCCCCCC(=O)OCCC(NN1CCCCCC1)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H10": "CCCCCC(C)CCC(=O)OCCC(NCCN(C(C)C)C(C)C)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H11": "CCCCCCC/C=C/C(=O)OCCC(NCCN(C(C)C)C(C)C)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H12": "CCCCCC(C)CCCC(=O)OCCC(NCCN(C(C)C)C(C)C)C(=O)NCCCCCCCCCCCCCC",
+      "H13": "CCCCCC(C)CCC(=O)OCCCC(NCCCCN(CC)CC)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H14": "CCCCCCC/C=C/C(=O)OCCCC(NCCCCN(CC)CC)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H15": "CCCCCCCC/C=C/CCCCCCC(=O)OCCC(NCCCCN(CC)CC)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H31": "CCCCCC(C)CCCC(=O)OCCC(NCCN1CCCCCC1)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H32": "CCCCCCC/C=C/C(=O)OCCC(NCCN1CCCCCC1)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H33": "CCCCCC(C)CCC(=O)OCCC(NCCN1CCCCCC1)C(=O)NCCCCCCCCCCCCCCCCCC",
+      "H34": "CCCCCCCC/C=C/CCCCCCC(=O)OCCC(NCCN(C)C)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H35": "CCCCCC(C)CCC(=O)OCCCC(NCCCN(C)C)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H36": "CCCCCCC/C=C/C(=O)OCCCC(NCCCN(C)C)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H37": "CCCCCC(C)CCC(=O)OCCCC(NCCCN(C)C)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H38": "CCCCCC(C)CCC(=O)OCCCC(NCCN(C)C)C(=O)NCCCCCCCCCCCCCCCCCC",
+      "H39": "CCCCCCC/C=C/C(=O)OCCC(NCCN(C)C)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H40": "CCCCCC(C)CCC(=O)OCCCC(NC1CCN(C(C)C)CC1)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H41": "CCCCCCC/C=C/C(=O)OCCCC(NC1CCN(C(C)C)CC1)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H42": "CCCCCC(C)CCC(=O)OCCCC(NC1CCN(C(C)C)CC1)C(=O)NCCCCCCCCCCCCCCCCCC",
+      "H43": "CCCCCC(C)CCC(=O)OCCC(NCCCN1CCOCC1)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H44": "CCCCCCCCC/C=C/C(=O)OCCCC(NCCCN1CCOCC1)C(=O)NCCCCCCCCCC/C=C/CCCCCCCCCC",
+      "H45": "CCCCCC(C)CCC(=O)OCCCC(NCCCN1CCOCC1)C(=O)NCCCCCCCCCCCCCCCCCC",
+      "FTT1": "CCCCCCCC=CC=CCCCCCCCCN(CCCCCCCC=CC=CCCCCCCCCC)CCCNC(=O)c1cc(C(=O)NCCN(CCCCCCCC=CC=CCCCCCCCCC)CCCCCCCC=CC=CCCCCCCCCC)cc(C(=O)NCCCN(CCCCCCCC=CC=CCCCCCCCCC)CCCCCCCC=CC=CCCCCCCCCC)c1",
+      "FTT2": "CCCCCCCCCCOC(=O)CCCCCCCCCN(CCCCCCCCCCOC(=O)CCCCCCCCCC)CCCNC(=O)c1cc(C(=O)NCCN(CCCCCCCCCCOC(=O)CCCCCCCCCC)CCCCCCCCCCOC(=O)CCCCCCCCCC)cc(C(=O)NCCCN(CCCCCCCCCCOC(=O)CCCCCCCCCC)CCCCCCCCCCOC(=O)CCCCCCCCCC)c1",
+      "FTT3": "CCC(CC)OC(=O)CCCCCCCCCN(CCC(CC)OC(=O)CCCCCCCCCC)CCCNC(=O)c1cc(C(=O)NCCN(CCC(CC)OC(=O)CCCCCCCCCC)CCC(CC)OC(=O)CCCCCCCCCC)cc(C(=O)NCCCN(CCC(CC)OC(=O)CCCCCCCCCC)CCC(CC)OC(=O)CCCCCCCCCC)c1",
+      "FTT4": "CC(CCC)CCCOC(=O)CCCCCCCN(CC(CCC)CCCOC(=O)CCCCCCCC)CCCNC(=O)c1cc(C(=O)NCCN(CC(CCC)CCCOC(=O)CCCCCCCC)CC(CCC)CCCOC(=O)CCCCCCCC)cc(C(=O)NCCCN(CC(CCC)CCCOC(=O)CCCCCCCC)CC(CCC)CCCOC(=O)CCCCCCCC)c1",
+      "FTT5": "CCC(CCCC)COC(=O)CCCCCCCN(CCC(CCCC)COC(=O)CCCCCCCC)CCCNC(=O)c1cc(C(=O)NCCN(CCC(CCCC)COC(=O)CCCCCCCC)CCC(CCCC)COC(=O)CCCCCCCC)cc(C(=O)NCCCN(CCC(CCCC)COC(=O)CCCCCCCC)CCC(CCCC)COC(=O)CCCCCCCC)c1",
+      "FTT6": "CCCCCCCC(C)OC(=O)CCCCCCCN(CCCCCCCC(C)OC(=O)CCCCCCCC)CCCNC(=O)c1cc(C(=O)NCCN(CCCCCCCC(C)OC(=O)CCCCCCCC)CCCCCCCC(C)OC(=O)CCCCCCCC)cc(C(=O)NCCCN(CCCCCCCC(C)OC(=O)CCCCCCCC)CCCCCCCC(C)OC(=O)CCCCCCCC)c1",
+      "FTT7": "CCCCCCC=CCOC(=O)CCCCCCCN(CCCCCCC=CCOC(=O)CCCCCCCC)CCCNC(=O)c1cc(C(=O)NCCN(CCCCCCC=CCOC(=O)CCCCCCCC)CCCCCCC=CCOC(=O)CCCCCCCC)cc(C(=O)NCCCN(CCCCCCC=CCOC(=O)CCCCCCCC)CCCCCCC=CCOC(=O)CCCCCCCC)c1",
+      "FTT8": "CCCCCCC=CCCOC(=O)CCCCCCCN(CCCCCCC=CCCOC(=O)CCCCCCCC)CCCNC(=O)c1cc(C(=O)NCCN(CCCCCCC=CCCOC(=O)CCCCCCCC)CCCCCCC=CCCOC(=O)CCCCCCCC)cc(C(=O)NCCCN(CCCCCCC=CCCOC(=O)CCCCCCCC)CCCCCCC=CCCOC(=O)CCCCCCCC)c1",
+      "FTT9": "CCCCCCC=CCOC(=O)CCCCCCCN(CCCCCCC=CCOC(=O)CCCCCCCC)CCCNC(=O)c1cc(C(=O)NCCN(CCCCCCC=CCOC(=O)CCCCCCCC)CCCCCCC=CCOC(=O)CCCCCCCC)cc(C(=O)NCCCN(CCCCCCC=CCOC(=O)CCCCCCCC)CCCCCCC=CCOC(=O)CCCCCCCC)c1",
+      "FTT10": "CCC=CCOC(=O)CCCCCCCCN(CCC=CCOC(=O)CCCCCCCCC)CCCNC(=O)c1cc(C(=O)NCCN(CCC=CCOC(=O)CCCCCCCCC)CCC=CCOC(=O)CCCCCCCCC)cc(C(=O)NCCCN(CCC=CCOC(=O)CCCCCCCCC)CCC=CCOC(=O)CCCCCCCCC)c1",
+      "Dilinoleic-DEEA": "CCCCC/C=C\\C/C=C\\CCCCCCCCN(CCCCCCCC/C=C\\C/C=C\\CCCCCC)CCO",
+      "Dinonyl-HEAA": "CCCCCCCCCCOC(=O)CCCCCCCCCCCN(CCCCCCOC(=O)CCCCCCCC)CCO",
+      "Nonyl-HELA": "CCCCCCCCCCOC(=O)CCCCCCCCCCCN(CCCCCCCC/C=C\\C/C=C\\CCCCCC)CCO",
+      "Heptadecan-HELA": "CCCCCCCCC(CCCCCCCC)OC(=O)CCCCCCCN(CCO)CCCCCCCC/C=C\\C/C=C\\CCCCC",
+      "Heptadecan-HENO": "CCCCCCCCCOC(=O)CCCCCCCN(CCO)CCCCCCC(=O)OC(CCCCCCCC)CCCCCCCC",
+      "Di-Heptadecan-HEAA": "CCCCCCCCC(CCCCCCCC)OC(=O)CCCCCCCN(CCO)CCCCCCC(=O)OC(CCCCCCCC)CCCCCCCC",
+      "Heptadecan-DMENO": "CCCCCCCCCOC(=O)CCCCCCCN(CCN(C)C)CCCCCCC(=O)OC(CCCCCCCC)CCCCCCCC",
+      "Heptadecan-HEUO": "CCCCCCCCCCCOC(=O)CCCCCN(CCO)CCCCCCC(=O)OC(CCCCCCCC)CCCCCCCC",
+      "Heptadecan-HENO-4": "CCCCCCCCCOC(=O)CCCN(CCO)CCCCCCC(=O)OC(CCCCCCCC)CCCCCCCC",
+      "Henicosan-HEUO": "CCCCCCCCCCCOC(=O)CCCCCN(CCO)CCCCC(=O)OC(CCCCCCCCCC)CCCCCCCCCC",
+      "tert-Butyl-HHEO": "CC(C)(C)OC(=O)CCCCCCCN(CCO)CCCCCCC(=O)OC(CCCCCCCC)CCCCCCCC",
+      "DMA-Lin-Oct-Chol": "CCCCCC/C=C\\C/C=C\\CCCCCCCCCC(=O)OCC(CN(C)C)OCCCCCCCCOC1CCC2C3CCC4CC(CCC4(C)C3CCC12C)C(C)CCCC(C)C",
+      "DMA-Lin-But-Chol": "CCCCC/C=C\\C/C=C\\CCCCCCCCCC(=O)OCC(COC(=O)CCCCC1CCC2C3CC=C4CC(O)CCC4(C)C3CCC12C)OCC[N+](C)(C)C",
+      "Mor-Lin-But-Chol": "CCCCC/C=C\\C/C=C\\CCCCCCCCCC(=O)OCC(COC(=O)CCCCC1CCC2C3CC=C4CC(O)CCC4(C)C3CCC12C)OCCN1CCOCC1",
+      "Pyr-Lin-But-Chol": "CCCCC/C=C\\C/C=C\\CCCCCCCCCC(=O)OCC(CN1CCCC1)OCCCOC1CCC2C3CC=C4CC(O)CCC4(C)C3CCC12C",
+      "DMA-Ole-Hex-Chol": "CCCCCCCCCC/C=C\\CCCCCCCCCC(=O)OCC(CN(C)C)OCCCCCOC1CCC2C3CC=C4CC(O)CCC4(C)C3CCC12C",
+      "DEA-Ole-Hex-Chol": "CCCCCCCCCC/C=C\\CCCCCCCCCC(=O)OCC(CN(CC)CC)OCCCCCOC1CCC2C3CC=C4CC(O)CCC4(C)C3CCC12C",
+      "1_methyl_pyrrolidine_oleyl_hexyl_cholesteryl_ether": "CN1CCCC1CCCCCCCC/C=C\\CCCCCCCCOCCCCCC[C@H]2CC[C@H]3[C@@H]4CC=C5C[C@@H](O)CC[C@]5(C)[C@H]4CC[C@]23C",
+      "3_fluoropiperidine_oleyl_hexyl_cholesteryl_ether": "FC1CCCNC1CCCCCCCC/C=C\\CCCCCCCCOCCCCCC[C@H]2CC[C@H]3[C@@H]4CC=C5C[C@@H](O)CC[C@]5(C)[C@H]4CC[C@]23C",
+      "pyrrolidine_oleyl_hexyl_cholesteryl_ether": "C1CCN(C1)CCCCCCCC/C=C\\CCCCCCCCOCCCCCC[C@H]2CC[C@H]3[C@@H]4CC=C5C[C@@H](O)CC[C@]5(C)[C@H]3CC[C@]23C",
+      "piperidine_oleyl_hexyl_cholesteryl_ether": "C1CCNCC1CCCCCCCC/C=C\\CCCCCCCCOCCCCCC[C@H]2CC[C@H]3[C@@H]4CC=C5C[C@@H](O)CC[C@]5(C)[C@H]4CC[C@]23C",
+      "morpholine_oleyl_hexyl_cholesteryl_ether": "C1COCCN1CCCCCCCC/C=C\\CCCCCCCCOCCCCCC[C@H]2CC[C@H]3[C@@H]4CC=C5C[C@@H](O)CC[C@]5(C)[C@H]4CC[C@]23C",
+      "imidazole_oleyl_hexyl_cholesteryl_ether": "C1=CN=CN1CCCCCCCC/C=C\\CCCCCCCCOCCCCCC[C@H]2CC[C@H]3[C@@H]4CC=C5C[C@@H](O)CC[C@]5(C)[C@H]4CC[C@]23C",
+      "benzyl_amine_oleyl_hexyl_cholesteryl_ether": "C1=CC=CC=C1CNCCCCCCCC/C=C\\CCCCCCCCOCCCCCC[C@H]2CC[C@H]3[C@@H]4CC=C5C[C@@H](O)CC[C@]5(C)[C@H]4CC[C@]23C",
+      "methyl_piperazine_oleyl_hexyl_cholesteryl_ether": "CN1CCNCC1CCCCCCCC/C=C\\CCCCCCCCOCCCCCC[C@H]2CC[C@H]3[C@@H]4CC=C5C[C@@H](O)CC[C@]5(C)[C@H]4CC[C@]23C",
+      "6Ac1-C12": "CCCCCCCCCCCCN(C)C(=O)CCCOC(COC(=O)CCCN(C)CCCCCCCCCCCC)(COC(=O)CCCN(C)CCCCCCCCCCCC)OC(=O)CCCN(C)CCCCCCCCCCCC",
+      "Heptadecan-9-yl 8-((2-hydroxyethyl)(8-(nonyloxy)-8-oxooctyl)amino)octanoate": "CCCCCCCCCOC(=O)CCCCCCCN(CCCCCCCC(=O)OC(CCCCCCCC)CCCCCCCC)CCO",
+      "1-A2-6b": "NNCC1=CC(=C(O)C(=C1)OC(=O)CC(CC)CCC)OC(=O)CC(CC)CCC",
+      "1-A2-9b2": "NNCC1=CC(=C(O)C(=C1)OC(=O)CCC(CC)CCCCCC)OC(=O)CCC(CC)CCCCCC",
+      "1-A2-7b2": "NNCC1=CC(=C(O)C(=C1)OC(=O)CC(CC)CCCC)OC(=O)CC(CC)CCCC",
+      "1-A2-8b": "NNCC1=CC(=C(O)C(=C1)OC(=O)CC(CC)CCCCC)OC(=O)CC(CC)CCCCC",
+      "1-A3-6b": "NNCC1=CC(=C(OC(=O)CC(CC)CCC)C(=C1)OC(=O)CC(CC)CCC)OC(=O)CC(CC)CCC",
+      "1-A3-7b": "NNCC1=CC(=C(OC(=O)CC(CC)CCCC)C(=C1)OC(=O)CC(CC)CCCC)OC(=O)CC(CC)CCCC",
+      "2-A2-6b": "NCCCCNCC1=CC(=C(O)C(=C1)OC(=O)CC(CC)CCC)OC(=O)CC(CC)CCC",
+      "2-A2-9b": "NCCCCNCC1=CC(=C(O)C(=C1)OC(=O)CC(CCCCCC)CC)OC(=O)CC(CCCCCC)CC",
+      "2-A2-7b": "NCCCCNCC1=CC(=C(O)C(=C1)OC(=O)CC(CC)CCCC)OC(=O)CC(CC)CCCC",
+      "2-A2-9b2": "NCCCCNCC1=CC(=C(O)C(=C1)OC(=O)CCC(CC)CCCCCC)OC(=O)CCC(CC)CCCCCC",
+      "2-A2-7b2": "NCCCCNCC1=CC(=C(O)C(=C1)OC(=O)CC(CC)CCCC)OC(=O)CC(CC)CCCC",
+      "2-A2-8b": "NCCCCNCC1=CC(=C(O)C(=C1)OC(=O)CC(CC)CCCCC)OC(=O)CC(CC)CCCCC",
+      "2-A3-6b": "NCCCCNCC1=CC(=C(OC(=O)CC(CC)CCC)C(=C1)OC(=O)CC(CC)CCC)OC(=O)CC(CC)CCC",
+      "2-A3-7b": "NCCCCNCC1=CC(=C(OC(=O)CC(CC)CCCC)C(=C1)OC(=O)CC(CC)CCCC)OC(=O)CC(CC)CCCC",
+      "3-A2-6b": "NC1CCN(CC1)CC2=CC(=C(O)C(=C2)OC(=O)CC(CC)CCC)OC(=O)CC(CC)CCC",
+      "3-A2-9b": "NC1CCN(CC1)CC2=CC(=C(O)C(=C2)OC(=O)CC(CCCCCC)CC)OC(=O)CC(CCCCCC)CC",
+      "3-A2-7b": "NC1CCN(CC1)CC2=CC(=C(O)C(=C2)OC(=O)CC(CC)CCCC)OC(=O)CC(CC)CCCC",
+      "3-A2-9b2": "NC1CCN(CC1)CC2=CC(=C(O)C(=C2)OC(=O)CCC(CC)CCCCCC)OC(=O)CCC(CC)CCCCCC",
+      "3-A2-7b2": "NC1CCN(CC1)CC2=CC(=C(O)C(=C2)OC(=O)CC(CC)CCCC)OC(=O)CC(CC)CCCC",
+      "3-A2-8b": "NC1CCN(CC1)CC2=CC(=C(O)C(=C2)OC(=O)CC(CC)CCCCC)OC(=O)CC(CC)CCCCC",
+      "3-A3-6b": "NC1CCN(CC1)CC2=CC(=C(OC(=O)CC(CC)CCC)C(=C2)OC(=O)CC(CC)CCC)OC(=O)CC(CC)CCC",
+      "3-A3-7b": "NC1CCN(CC1)CC2=CC(=C(OC(=O)CC(CC)CCCC)C(=C2)OC(=O)CC(CC)CCCC)OC(=O)CC(CC)CCCC",
+      "4-A2-6b": "NCCN1CCN(CC1)CC2=CC(=C(O)C(=C2)OC(=O)CC(CC)CCC)OC(=O)CC(CC)CCC",
+      "4-A2-9b": "NCCN1CCN(CC1)CC2=CC(=C(O)C(=C2)OC(=O)CC(CCCCCC)CC)OC(=O)CC(CCCCCC)CC",
+      "4-A2-7b": "NCCN1CCN(CC1)CC2=CC(=C(O)C(=C2)OC(=O)CC(CC)CCCC)OC(=O)CC(CC)CCCC",
+      "4-A2-9b2": "NCCN1CCN(CC1)CC2=CC(=C(O)C(=C2)OC(=O)CCC(CC)CCCCCC)OC(=O)CCC(CC)CCCCCC",
+      "4-A2-7b2": "NCCN1CCN(CC1)CC2=CC(=C(O)C(=C2)OC(=O)CC(CC)CCCC)OC(=O)CC(CC)CCCC",
+      "4-A2-8b": "NCCN1CCN(CC1)CC2=CC(=C(O)C(=C2)OC(=O)CC(CC)CCCCC)OC(=O)CC(CC)CCCCC",
+      "4-A3-6b": "NCCN1CCN(CC1)CC2=CC(=C(OC(=O)CC(CC)CCC)C(=C2)OC(=O)CC(CC)CCC)OC(=O)CC(CC)CCC",
+      "4-A3-7b": "NCCN1CCN(CC1)CC2=CC(=C(OC(=O)CC(CC)CCCC)C(=C2)OC(=O)CC(CC)CCCC)OC(=O)CC(CC)CCCC",
+      "5-A2-6b": "O=C(CC(CC)CCC)OC1=CC(CN2CCN(CCN3CCN(CC3)CC4=CC(=C(OC(=O)CC(CC)CCC)C=C4)OC(=O)CC(CC)CCC)CC2)=CC(OC(=O)CC(CC)CCC)=C1O",
+      "5-A2-9b": "O=C(CC(CCCCCC)CC)OC1=CC(CN2CCN(CCN3CCN(CC3)CC4=CC(=C(OC(=O)CC(CCCCCC)CC)C=C4)OC(=O)CC(CCCCCC)CC)CC2)=CC(OC(=O)CC(CCCCCC)CC)=C1O",
+      "5-A2-7b": "O=C(CC(CC)CCCC)OC1=CC(CN2CCN(CCN3CCN(CC3)CC4=CC(=C(OC(=O)CC(CC)CCCC)C=C4)OC(=O)CC(CC)CCCC)CC2)=CC(OC(=O)CC(CC)CCCC)=C1O",
+      "5-A2-9b2": "O=C(CCC(CC)CCCCCC)OC1=CC(CN2CCN(CCN3CCN(CC3)CC4=CC(=C(OC(=O)CCC(CC)CCCCCC)C=C4)OC(=O)CCC(CC)CCCCCC)CC2)=CC(OC(=O)CCC(CC)CCCCCC)=C1O",
+      "5-A2-7b2": "O=C(CC(CC)CCCC)OC1=CC(CN2CCN(CCN3CCN(CC3)CC4=CC(=C(OC(=O)CC(CC)CCCC)C=C4)OC(=O)CC(CC)CCCC)CC2)=CC(OC(=O)CC(CC)CCCC)=C1O",
+      "5-A2-8b": "O=C(CC(CC)CCCCC)OC1=CC(CN2CCN(CCN3CCN(CC3)CC4=CC(=C(OC(=O)CC(CC)CCCCC)C=C4)OC(=O)CC(CC)CCCCC)CC2)=CC(OC(=O)CC(CC)CCCCC)=C1O",
+      "5-A3-6b": "O=C(CC(CC)CCC)OC1=CC(CN2CCN(CCN3CCN(CC3)CC4=CC(=C(OC(=O)CC(CC)CCC)C=C4)OC(=O)CC(CC)CCC)CC2)=CC(OC(=O)CC(CC)CCC)=C1OC(=O)CC(CC)CCC",
+      "5-A3-7b": "O=C(CC(CC)CCCC)OC1=CC(CN2CCN(CCN3CCN(CC3)CC4=CC(=C(OC(=O)CC(CC)CCCC)C=C4)OC(=O)CC(CC)CCCC)CC2)=CC(OC(=O)CC(CC)CCCC)=C1OC(=O)CC(CC)CCCC",
+      "10-A2-8b": "O=C(CC(CC)CCCCC)OC1=C(O)C(CN2CCN(CC2)CC3=CC(=C(O)C(=C3)OC(=O)CC(CC)CCCCC)OC(=O)CC(CC)CCCCC)=CC(=C1)OC(=O)CC(CC)CCCCC",
+      "10-A3-6b": "O=C(CC(CC)CCC)OC1=C(OC(=O)CC(CC)CCC)C(CN2CCN(CC2)CC3=CC(=C(OC(=O)CC(CC)CCC)C(=C3)OC(=O)CC(CC)CCC)OC(=O)CC(CC)CCC)=CC(=C1)OC(=O)CC(CC)CCC",
+      "10-A3-9b2": "O=C(CCC(CC)CCCCCC)OC1=C(OC(=O)CCC(CC)CCCCCC)C(CN2CCN(CC2)CC3=CC(=C(OC(=O)CCC(CC)CCCCCC)C(=C3)OC(=O)CCC(CC)CCCCCC)OC(=O)CCC(CC)CCCCCC)=CC(=C1)OC(=O)CCC(CC)CCCCCC",
+      "11-A2-6b": "O=C(CC(CC)CCC)OC1=C(O)C(CN2CCN(CCN(CC)CC)CC2)=CC(=C1)OC(=O)CC(CC)CCC",
+      "11-A2-7b": "O=C(CC(CC)CCCC)OC1=C(O)C(CN2CCN(CCN(CC)CC)CC2)=CC(=C1)OC(=O)CC(CC)CCCC",
+      "11-A2-7b2": "O=C(CC(CC)CCCC)OC1=C(O)C(CN2CCN(CCN(CC)CC)CC2)=CC(=C1)OC(=O)CC(CC)CCCC",
+      "11-A2-8b": "O=C(CC(CC)CCCCC)OC1=C(O)C(CN2CCN(CCN(CC)CC)CC2)=CC(=C1)OC(=O)CC(CC)CCCCC",
+      "11-A2-9b2": "O=C(CCC(CC)CCCCCC)OC1=C(O)C(CN2CCN(CCN(CC)CC)CC2)=CC(=C1)OC(=O)CCC(CC)CCCCCC",
+      "11-A3-6b": "O=C(CC(CC)CCC)OC1=C(OC(=O)CC(CC)CCC)C(CN2CCN(CCN(CC)CC)CC2)=CC(=C1)OC(=O)CC(CC)CCC",
+      "11-A3-7b": "O=C(CC(CC)CCCC)OC1=C(OC(=O)CC(CC)CCCC)C(CN2CCN(CCN(CC)CC)CC2)=CC(=C1)OC(=O)CC(CC)CCCC",
+      "11-A3-7b2": "O=C(CC(CC)CCCC)OC1=C(OC(=O)CC(CC)CCCC)C(CN2CCN(CCN(CC)CC)CC2)=CC(=C1)OC(=O)CC(CC)CCCC",
+      "11-A3-9b2": "O=C(CCC(CC)CCCCCC)OC1=C(OC(=O)CCC(CC)CCCCCC)C(CN2CCN(CCN(CC)CC)CC2)=CC(=C1)OC(=O)CCC(CC)CCCCCC",
+      "1-A2-7b": "NNCC1=CC(=C(O)C(=C1)OC(=O)CC(CC)CCCC)OC(=O)CC(CC)CCCC",
+      "1-A2-9b": "NNCC1=CC(=C(O)C(=C1)OC(=O)CC(CCCCCC)CC)OC(=O)CC(CCCCCC)CC",
+      "1-A2-6": "NNCC1=CC(=C(O)C(=C1)OC(=O)CCCCCC)OC(=O)CCCCCC",
+      "1-A2-7": "NNCC1=CC(=C(O)C(=C1)OC(=O)CCCCCCC)OC(=O)CCCCCCC",
+      "11-A2-7": "O=C(CCCCCCC)OC1=C(O)C(CN2CCN(CCN(CC)CC)CC2)=CC(=C1)OC(=O)CCCCCCC",
+      "11-A2-6": "O=C(CCCCCC)OC1=C(O)C(CN2CCN(CCN(CC)CC)CC2)=CC(=C1)OC(=O)CCCCCC",
+      "11-A2-9b": "O=C(CC(CCCCCC)CC)OC1=C(O)C(CN2CCN(CCN(CC)CC)CC2)=CC(=C1)OC(=O)CC(CCCCCC)CC",
+      "H1A1B1": "CCCCCCCC/C=C\\CCCCCCCCN(C)CCO",
+      "H1A1B2": "CCCCCCCC/C=C\\CCCCCCCCN(CCO)CCO",
+      "H1A1B3": "CCCCCCCC/C=C\\CCCCCCCCN(CC)CCO",
+      "H1A1B4": "CCCCCCCC/C=C\\CCCCCCCCN(CCC)CCO",
+      "H1A2B1": "CCCCCCCC/C=C\\CCCCCCCCN(C)CCO",
+      "H1A2B2": "CCCCCCCC/C=C\\CCCCCCCCN(CCO)CCO",
+      "H1A2B3": "CCCCCCCC/C=C\\CCCCCCCCN(CC)CCO",
+      "H1A2B4": "CCCCCCCC/C=C\\CCCCCCCCN(CCC)CCO",
+      "H2A4B3": "CCCCCCCC/C=C\\CCCCCCCCN(CC)CCO",
+      "H2A4B4": "CCCCCCCC/C=C\\CCCCCCCCN(CCC)CCO",
+      "A4B4-S3": "O=C(CCN(CCN(CCN(CCC(OCCCCOC(C(CSCCCCCCCC)C)=O)=O)CCC(OCCCCOC(C(CSCCCCCCCC)C)=O)=O)C)CCC(OCCCCOC(C(CSCCCCCCCC)C)=O)=O)OCCCCOC(C(CSCCCCCCCC)C)=O",
+      "A4B4-S4": "O=C(CCN(CCN(CCN(CCC(OCCCCOC(C(CSCCCCCCCC)C)=O)=O)CCC(OCCCCOC(C(CSCCCCCCCC)C)=O)=O)C)CCC(OCCCCOC(C(CSCCCCCCCC)C)=O)=O)OCCCCOC(C(CSCCCCCCCC)C)=O",
+      "C245C10": "CCCCCCCCCC(O)CN(CC(O)CCCCCCCCCC)CCCN1CCN(CC(O)CCCCCCCCCC)CC1CC(O)CCCCCCCCCC",
+      "C246C10": "CCCCCCCCCCC(CN(CCCN1CCN(CC1)CCCN(CC(CCCCCCCCCC)O)CC(CCCCCCCCCC)O)CC(CCCCCCCCCC)O)O",
+      "MPyr-Ole-Hex-Chol": "CN1CCCC1CCCCCCCC/C=C\\CCCCCCCCOCCCCCC[C@H]2CC[C@H]3[C@@H]4CC=C5C[C@@H](O)CC[C@]5(C)[C@H]4CC[C@]23C",
+      "FPip-Ole-Hex-Chol": "FC1CCCNC1CCCCCCCC/C=C\\CCCCCCCCOCCCCCC[C@H]2CC[C@H]3[C@@H]4CC=C5C[C@@H](O)CC[C@]5(C)[C@H]4CC[C@]23C",
+      "Pyr-Ole-Hex-Chol": "CCCCCCCCCC/C=C\\CCCCCCCCCC(=O)OCC(CN1CCCC1)OCCCCCOC1CCC2C3CC=C4CC(O)CCC4(C)C3CCC12C",
+      "Pip-Ole-Hex-Chol": "CCCCCCCCCC/C=C\\CCCCCCCCCC(=O)OCC(CN1CCCCC1)OCCCCCOC1CCC2C3CC=C4CC(O)CCC4(C)C3CCC12C",
+      "Mor-Ole-Hex-Chol": "CCCCCCCCCC/C=C\\CCCCCCCCCC(=O)OCC(CN1CCOCC1)OCCCCCOC1CCC2C3CC=C4CC(O)CCC4(C)C3CCC12C",
+      "Imi-Ole-Hex-Chol": "CCCCCCCCCC/C=C\\CCCCCCCCCC(=O)OCC(Cn1ccnc1)OCCCCCOC1CCC2C3CC=C4CC(O)CCC4(C)C3CCC12C",
+      "BA-Ole-Hex-Chol": "CCCCCCCCCC/C=C\\CCCCCCCCCC(=O)OCC(CN(C)Cc1ccccc1)OCCCCCOC1CCC2C3CC=C4CC(O)CCC4(C)C3CCC12C",
+      "MPz-Ole-Hex-Chol": "CCCCCCCCCC/C=C\\CCCCCCCCCC(=O)OCC(CN1CCN(C)CC1)OCCCCCOC1CCC2C3CC=C4CC(O)CCC4(C)C3CCC12C",
+      "MDOA": "N/A",
+      "5A2-SC8": "N/A",
+      "DDAB": "CCCCCCCCCC[N+](C)(C)CCCCCCCCCC.[Br-]",
+      "DSPC": "CCCCCCCCCCCCCCCCCC(=O)OC[C@H](COP(=O)([O-])OCC[N+](C)(C)C)OC(=O)CCCCCCCCCCCCCCCCC",
+      "DOPE": "CCCCCCCC/C=C\\CCCCCCCC(=O)OC[C@H](COP(=O)(O)OCCN)OC(=O)CCCCCCC/C=C\\CCCCCCCC",
+      "DOPC": "CCCCCCCC/C=C\\CCCCCCCC(=O)OC[C@H](COP(=O)([O-])OCC[N+](C)(C)C)OC(=O)CCCCCCC/C=C\\CCCCCCCC",
+      "DPPC": "CCCCCCCCCCCCCCCC(=O)OC[C@H](COP(=O)([O-])OCC[N+](C)(C)C)OC(=O)CCCCCCCCCCCCCCC",
+      "DPPE": "CCCCCCCCCCCCCCCC(=O)OC[C@H](COP(=O)([O-])OCCN)OC(=O)CCCCCCCCCCCCCCC",
+      "DSPE": "CCCCCCCCCCCCCCCCCC(=O)OCC(COP(=O)(O)OCCN)OC(=O)CCCCCCCCCCCCCCCCC",
+      "DMPE": "CCCCCCCCCCCCCC(=O)OCC(COP(=O)(O)OCCN)OC(=O)CCCCCCCCCCCCC",
+      "sphingomyelin": "CCCCCCCCCCCCCCCCCC(=O)NC(COP(=O)([O-])OCC[N+](C)(C)C)C(O)C=CCCCCCCCCCCCC",
+      "egg-PC": "CCCCCCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCC[N+](C)(C)C)OC(=O)CCCCCCC=CCCCCCCCC",
+      "soy-PC": "CCCCC=CCC=CCCCCCCCC(=O)OCC(COP(=O)([O-])OCC[N+](C)(C)C)OC(=O)CCCCCCC=CCC=CCCCC",
+      "POPC": "CCCCCCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCC[N+](C)(C)C)OC(=O)CCCCCCC=CCCCCCCCC",
+      "POPE": "CCCCCCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCCN)OC(=O)CCCCCCC=CCCCCCCCC",
+      "DLPC": "CCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCC[N+](C)(C)C)OC(=O)CCCCCCCCCCC",
+      "DLPE": "CCCCCCCCCCCC(=O)OCC(COP(=O)([O-])OCCN)OC(=O)CCCCCCCCCCC",
+      "cholesterol": "C[C@H](CCCC(C)C)[C@H]1CC[C@@H]2[C@@]1(CC[C@H]3[C@H]2CC=C4[C@@]3(CC[C@@H](C4)O)C)C",
+      "sitosterol": "CC[C@@H](CC[C@@H](C)[C@H]1CC[C@@H]2[C@@]1(CC[C@H]3[C@H]2CCC4[C@@]3(CC[C@@H](C4)O)C)C)C(C)C",
+      "stigmasterol": "CC[C@H](/C=C/[C@@H](C)[C@H]1CC[C@@H]2[C@@]1(CC[C@H]3[C@H]2CC=C4[C@@]3(CC[C@@H](C4)O)C)C)C(C)C",
+      "ergosterol": "C[C@H](/C=C/[C@H](C)C(C)C)[C@H]1CC[C@@H]2[C@@]1(CC[C@H]3C2=CC=C4[C@@]3(CC[C@@H](C4)O)C)C"
+    };
+
+    let rawDataset = [];
+    let filteredDataset = [];
+    let currentPage = 1;
+    let pageSize = 25;
+    let totalPages = 1;
+
+    let chartHistogram = null;
+    let chartDoughnut = null;
+
+    // Helper to resolve generic "Custom lipid" to specific original names
+    function cleanCustomLipidLabels() {
+      const customTerms = ['custom lipid', 'custom_lipid', 'custom'];
+      rawDataset.forEach(r => {
+        if (r.ionizable_lipid && customTerms.includes(r.ionizable_lipid.trim().toLowerCase())) {
+          r.is_custom = true;
+          r.is_custom_ion = true;
+          if (r.ionizable_lipid_original && !customTerms.includes(r.ionizable_lipid_original.trim().toLowerCase())) {
+            r.ionizable_lipid = r.ionizable_lipid_original.trim();
+          }
+        }
+        if (r.peg_lipid && customTerms.includes(r.peg_lipid.trim().toLowerCase())) {
+          r.is_custom_peg = true;
+          if (r.peg_lipid_original && !customTerms.includes(r.peg_lipid_original.trim().toLowerCase())) {
+            r.peg_lipid = r.peg_lipid_original.trim();
+          }
+        }
+        if (r.sterol_lipid && customTerms.includes(r.sterol_lipid.trim().toLowerCase())) {
+          r.is_custom_sterol = true;
+          if (r.sterol_lipid_original && !customTerms.includes(r.sterol_lipid_original.trim().toLowerCase())) {
+            r.sterol_lipid = r.sterol_lipid_original.trim();
+          }
+        }
+        if (r.helper_lipid && customTerms.includes(r.helper_lipid.trim().toLowerCase())) {
+          r.is_custom_helper = true;
+          if (r.helper_lipid_original && !customTerms.includes(r.helper_lipid_original.trim().toLowerCase())) {
+            r.helper_lipid = r.helper_lipid_original.trim();
+          }
+        }
+      });
+    }
+
+    // Tab Navigation Logic
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      
+      document.querySelectorAll('.nav-link').forEach(el => {
+        el.classList.remove('text-primary-600');
+        el.classList.add('text-gray-600');
+      });
+      document.getElementById('nav-' + tabId).classList.remove('text-gray-600');
+      document.getElementById('nav-' + tabId).classList.add('text-primary-600');
+      window.scrollTo(0,0);
+    }
+
+    // Initialize App On Load
+    window.addEventListener('DOMContentLoaded', () => {
+      Papa.parse('LNP-mRNA Dataset.csv', {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        complete: function(res) {
+          if (res.data && res.data.length > 0) {
+            rawDataset = res.data.filter(r => r.lnp_id || r.ionizable_lipid);
+            cleanCustomLipidLabels();
+            filteredDataset = [...rawDataset];
+            initApp();
+          } else {
+            document.getElementById('results-container').innerHTML = `<div class="text-center text-red-500 py-10">Failed to load dataset. Make sure you run via a local web server (e.g. http-server).</div>`;
+          }
+        },
+        error: function(err) {
+          document.getElementById('results-container').innerHTML = `<div class="text-center text-red-500 py-10">Error loading dataset. Make sure you run via a local web server (e.g. http-server).</div>`;
+        }
+      });
+    });
+
+    // Core Init Function
+    function initApp() {
+      initDropdowns();
+      initMetrics();
+      generateReferenceTables();
+      applyFilters();
+    }
+
+    // Populate Sidebar Filter Dropdowns
+    function initDropdowns() {
+      const getSet = col => [...new Set(rawDataset.map(r => r[col]).filter(Boolean))].sort();
+      
+      const fill = (id, arr) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = '<option value="">Select...</option>';
+        arr.forEach(val => el.innerHTML += `<option value="${val}">${val}</option>`);
+      }
+      
+      const allowedIonizable = [
+        "244-cis", "246C10", "4A3-SC8", "7C1", "9A1P9", "A12-Iso5-2DC18", "A18-Iso5-2DC18", "A2-Iso5-2DC18", 
+        "ALC-0315", "AX4", "BP-Lipid-135", "C10-200", "C12-200", "C9-200", "DLenDMA", 
+        "DLin-2-DMAP", "DLin-C-DAP", "DLin-KC2-DMA", "DLin-KC3-DMA", "DLin-MC3-DMA", "DLin-S-DMA", "DLinDAP", 
+        "DLinDMA", "DMAP-BLP", "DODAC", "DODAP", "DODMA", "DOTAP", "DOTMA", "DSDMA", 
+        "Heptadecan-9-yl 8-((2-hydroxyethyl)(8-(nonyloxy)-8-oxooctyl)amino)octanoate", "L202", "OF-02", 
+        "OF-C4-Deg-Lin", "OF-Deg-Lin", "SM-102", "ZA3-Ep10", "cKK-E12"
+      ];
+      const rawIons = getSet('ionizable_lipid');
+      const filteredIons = rawIons.filter(val => allowedIonizable.includes(val));
+      
+      const hasCustom = rawDataset.some(r => r.is_custom);
+      if (hasCustom) {
+        filteredIons.push("Custom lipid");
+      }
+      filteredIons.sort();
+      
+      fill('filter-ionizable', filteredIons);
+      fill('filter-peg', getSet('peg_lipid'));
+      fill('filter-sterol', getSet('sterol_lipid'));
+      fill('filter-helper', getSet('helper_lipid'));
+    }
+
+    // Populate Top KPI Cards
+    function initMetrics() {
+      document.getElementById('metric-formulations').textContent = rawDataset.length.toLocaleString();
+      document.getElementById('badge-total-formulations').textContent = `${rawDataset.length.toLocaleString()} Formulations`;
+      
+      const lipids = new Set(rawDataset.map(r => r.ionizable_lipid).filter(Boolean));
+      document.getElementById('metric-lipids').textContent = lipids.size + '+';
+      document.getElementById('badge-total-lipids').textContent = `${lipids.size}+ Unique Lipids`;
+ 
+      const papers = new Set(rawDataset.map(r => r.paper_title).filter(Boolean));
+      const paperCount = papers.size > 0 ? papers.size : '45+';
+      document.getElementById('metric-papers').textContent = paperCount;
+      document.getElementById('badge-total-papers').textContent = `${paperCount} Papers`;
+
+      let sum = 0, count = 0;
+      rawDataset.forEach(r => {
+        let v = parseFloat(r.encapsulation_efficiency_percent_std);
+        if(!isNaN(v) && v > 0 && v <= 100) { sum += v; count++; }
+      });
+      document.getElementById('metric-encapsulation').textContent = count > 0 ? (sum/count).toFixed(1) + '%' : '0%';
+    }
+
+    // Apply Filters & Refresh UI
+    function applyFilters() {
+      const ion = document.getElementById('filter-ionizable').value;
+      const peg = document.getElementById('filter-peg').value;
+      const sterol = document.getElementById('filter-sterol').value;
+      const helper = document.getElementById('filter-helper').value;
+      
+      const maxSz = parseFloat(document.getElementById('filter-size-max').value);
+      const maxPdi = parseFloat(document.getElementById('filter-pdi-max').value);
+      const maxZeta = parseFloat(document.getElementById('filter-zeta-max').value);
+      const maxEnc = parseFloat(document.getElementById('filter-encapsulation-max').value);
+
+      document.getElementById('label-size').textContent = `Selected: 0 ~ ${maxSz} nm`;
+      document.getElementById('label-pdi').textContent = `Selected: 0.00 ~ ${maxPdi.toFixed(2)}`;
+      document.getElementById('label-zeta').textContent = `Selected: -50 ~ ${maxZeta} mV`;
+      document.getElementById('label-encapsulation').textContent = `Selected: 0 ~ ${maxEnc} %`;
+
+      filteredDataset = rawDataset.filter(r => {
+        if(ion) {
+          if(ion === "Custom lipid") {
+            if(!r.is_custom) return false;
+          } else {
+            if(r.ionizable_lipid !== ion) return false;
+          }
+        }
+        if(peg && r.peg_lipid !== peg) return false;
+        if(sterol && r.sterol_lipid !== sterol) return false;
+        if(helper && r.helper_lipid !== helper) return false;
+        
+        let sz = parseFloat(r.particle_size_nm_std);
+        if(!isNaN(sz) && sz > maxSz) return false;
+        
+        let pdi = parseFloat(r.pdi_std);
+        if(!isNaN(pdi) && pdi > maxPdi) return false;
+        
+        let enc = parseFloat(r.encapsulation_efficiency_percent_std);
+        if(!isNaN(enc) && enc > maxEnc) return false;
+
+        return true;
+      });
+
+      currentPage = 1;
+      updateUI();
+    }
+
+    // Reset Filters Button
+    function resetFilters() {
+      document.getElementById('filter-ionizable').value = '';
+      document.getElementById('filter-peg').value = '';
+      document.getElementById('filter-sterol').value = '';
+      document.getElementById('filter-helper').value = '';
+      
+      document.getElementById('filter-size-max').value = 500;
+      document.getElementById('filter-pdi-max').value = 1;
+      document.getElementById('filter-zeta-max').value = 50;
+      document.getElementById('filter-encapsulation-max').value = 100;
+      applyFilters();
+    }
+
+    // Pagination Methods
+    // (changePageSize, prevPage, nextPage, updateUI remain identical)
+    function changePageSize() {
+      pageSize = parseInt(document.getElementById('page-size').value);
+      currentPage = 1;
+      updateUI();
+    }
+    function prevPage() { if(currentPage > 1) { currentPage--; updateUI(); } }
+    function nextPage() { if(currentPage < totalPages) { currentPage++; updateUI(); } }
+
+    function updateUI() {
+      renderCards();
+      renderCharts();
+    }
+
+    // Show formulation details modal (like a separate page)
+    function toggleDetails(detailsId) {
+      const lnpId = detailsId.replace("details-", "");
+      showDetailModal(lnpId);
+    }
+
+    function showDetailModal(lnpId) {
+      const row = rawDataset.find(r => String(r.lnp_id) === String(lnpId));
+      if (!row) return;
+
+      const ratioText = row.lipid_molar_ratio || "N/A";
+      const ionLabel = row.is_custom ? "Custom lipid" : (row.ionizable_lipid || "Custom lipid");
+      const titleParts = [ionLabel, row.peg_lipid, row.sterol_lipid, row.helper_lipid].filter(Boolean);
+      
+      let badgeYear = '2025';
+      if (row.paper_year && !isNaN(parseInt(row.paper_year))) {
+        badgeYear = row.paper_year;
+      }
+
+      const renderKV = (str) => {
+        if(!str) return '<div class="text-gray-400">Not provided</div>';
+        return str.split(';').map(pair => {
+          const parts = pair.split(':');
+          const k = parts[0];
+          const v = parts.slice(1).join(':');
+          if(!k || !k.trim()) return '';
+          return `<div class="mb-1.5 text-gray-700 font-mono text-[11px]">${k.trim()}: ${v.trim()}</div>`;
+        }).join('');
+      };
+
+      const synthesisHtml = renderKV(row.synthesis_info);
+      const bioactivityHtml = renderKV(row.bioactivity_profile);
+      
+      let authorText = '';
+      if (row.paper_authors) {
+        authorText = typeof row.paper_authors === 'string' ? row.paper_authors.replace(/\[|\]|'/g, '') : row.paper_authors;
+      }
+
+      const body = document.getElementById('detail-modal-body');
+      body.innerHTML = `
+        <div class="mb-6">
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 border-b border-gray-100 pb-4 mb-4">
+            <div>
+              <h4 class="font-bold text-gray-900 text-lg sm:text-xl leading-relaxed mb-1">
+                <span class="text-teal-600 font-semibold tracking-wide">${row.is_custom ? "Custom lipid" : (row.ionizable_lipid || 'Custom lipid')}</span> 
+                ${titleParts.length > 1 ? ' : ' + titleParts.slice(1).join(" : ") : ''} = <span class="text-gray-600 font-mono text-base ml-1">${ratioText}</span>
+              </h4>
+              <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">LID: ${row.lnp_id || 'Unknown'}</p>
+            </div>
+            <div>
+              <span class="bg-teal-100 text-teal-800 text-[10px] px-2.5 py-1 rounded font-bold whitespace-nowrap">
+                ${badgeYear}
+              </span>
+            </div>
+          </div>
+          
+          <!-- Key Metrics -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-6 text-xs text-gray-500 pb-4 border-b border-gray-100 mb-6">
+            <div>Particle size (nm) : <span class="font-bold text-gray-900">${row.particle_size_nm_std || ''}</span></div>
+            <div>PDI : <span class="font-bold text-gray-900">${row.pdi_std || ''}</span></div>
+            <div>Zeta potential (mV) : <span class="font-bold text-gray-900">${row.zeta_potential_mv_std || ''}</span></div>
+            <div>Encapsulation efficiency (%) : <span class="font-bold text-gray-900">${row.encapsulation_efficiency_percent_std || ''}</span></div>
+            <div>Target type : <span class="font-bold text-gray-900">${row.target_type || ''}</span></div>
+          </div>
+
+          <div class="space-y-6">
+            <!-- Synthesis Info -->
+            <div>
+              <h5 class="text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wider">Synthesis info</h5>
+              <div class="border border-gray-200 rounded-lg p-4 bg-[#f8fafc] text-[11px] leading-relaxed font-mono">
+                ${synthesisHtml}
+              </div>
+            </div>
+
+            <!-- Bioactivity Profile -->
+            <div>
+              <h5 class="text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wider">Bioactivity profile</h5>
+              <div class="border border-gray-200 rounded-lg p-4 bg-[#f8fafc] text-[11px] leading-relaxed font-mono">
+                ${bioactivityHtml}
+              </div>
+            </div>
+
+            <!-- Target Information -->
+            <div>
+              <h5 class="text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wider">Target information</h5>
+              <div class="border border-gray-200 rounded-lg p-4 bg-[#f8fafc] text-[11px] leading-relaxed font-mono">
+                <div class="mb-1.5 text-gray-700">loading capacity : ${row.loading_capacity_std || '-'}</div>
+                <div class="text-gray-700">nucleic acid sequence : ${row.nucleic_acid_sequence || '-'}</div>
+              </div>
+            </div>
+
+            <!-- Lipid Information -->
+            <div>
+              <h5 class="text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wider">Lipid information</h5>
+              <div class="border border-gray-200 rounded-lg p-4 bg-[#f8fafc] text-[11px] leading-relaxed font-mono space-y-5">
+                <!-- Ionizable -->
+                <div>
+                  <div class="text-gray-700 mb-1">Ionizable lipid: ${row.is_custom ? "Custom lipid" : (row.ionizable_lipid || '-')}</div>
+                  <div class="text-gray-500 pl-4 mb-0.5">&nbsp;&nbsp;- Original name : ${row.ionizable_lipid_original || '-'}</div>
+                  <div class="text-gray-500 pl-4 break-all">&nbsp;&nbsp;- SMILES : ${row.ionizable_lipid_smiles || '-'}</div>
+                </div>
+                <!-- PEG -->
+                <div>
+                  <div class="text-gray-700 mb-1">PEG lipid: ${row.peg_lipid || '-'}</div>
+                  <div class="text-gray-500 pl-4 mb-0.5">&nbsp;&nbsp;- Original name : ${row.peg_lipid_original || '-'}</div>
+                  <div class="text-gray-500 pl-4 break-all">&nbsp;&nbsp;- SMILES : ${row.peg_lipid_smiles || '-'}</div>
+                </div>
+                <!-- Sterol -->
+                <div>
+                  <div class="text-gray-700 mb-1">Sterol lipid: ${row.sterol_lipid || '-'}</div>
+                  <div class="text-gray-500 pl-4 mb-0.5">&nbsp;&nbsp;- Original name : ${row.sterol_lipid_original || '-'}</div>
+                  <div class="text-gray-500 pl-4 break-all">&nbsp;&nbsp;- SMILES : ${row.sterol_lipid_smiles || '-'}</div>
+                </div>
+                <!-- Helper -->
+                <div>
+                  <div class="text-gray-700 mb-1">Helper lipid: ${row.helper_lipid || '-'}</div>
+                  <div class="text-gray-500 pl-4 mb-0.5">&nbsp;&nbsp;- Original name : ${row.helper_lipid_original || '-'}</div>
+                  <div class="text-gray-500 pl-4 break-all">&nbsp;&nbsp;- SMILES : ${row.helper_lipid_smiles || '-'}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Publication Information -->
+            <div>
+              <h5 class="text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wider">Publication information</h5>
+              <div class="border border-gray-200 rounded-lg p-4 bg-[#f8fafc] text-[11px] leading-relaxed font-mono">
+                <div class="mb-2 text-gray-700">Paper title : ${row.paper_title || '-'}</div>
+                <div class="mb-2 text-gray-700">Authors : ${authorText || '-'}</div>
+                <div class="mb-2 text-gray-700">Journal : ${row.paper_journal || '-'}</div>
+                <div class="text-gray-700">DOI : <a href="${row.paper_doi}" target="_blank" class="text-blue-600 hover:underline">${row.paper_doi || '-'}</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('detail-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detail-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function filterByLipid(category, value) {
+      document.getElementById('filter-ionizable').value = '';
+      document.getElementById('filter-peg').value = '';
+      document.getElementById('filter-sterol').value = '';
+      document.getElementById('filter-helper').value = '';
+
+      const selectId = 'filter-' + category;
+      const el = document.getElementById(selectId);
+      if (el) {
+        el.value = value;
+      }
+
+      applyFilters();
+      switchTab('home');
+
+      const container = document.getElementById('results-container');
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function handleLibraryClick(lipidName) {
+      if (!lipidName) return;
+      const name = lipidName.trim();
+      
+      const allowedIonizable = [
+        "244-cis", "246C10", "4A3-SC8", "7C1", "9A1P9", "A12-Iso5-2DC18", "A18-Iso5-2DC18", "A2-Iso5-2DC18", 
+        "ALC-0315", "AX4", "BP-Lipid-135", "C10-200", "C12-200", "C9-200", "DLenDMA", 
+        "DLin-2-DMAP", "DLin-C-DAP", "DLin-KC2-DMA", "DLin-KC3-DMA", "DLin-MC3-DMA", "DLin-S-DMA", "DLinDAP", 
+        "DLinDMA", "DMAP-BLP", "DODAC", "DODAP", "DODMA", "DOTAP", "DOTMA", "DSDMA", 
+        "Heptadecan-9-yl 8-((2-hydroxyethyl)(8-(nonyloxy)-8-oxooctyl)amino)octanoate", "L202", "OF-02", 
+        "OF-C4-Deg-Lin", "OF-Deg-Lin", "SM-102", "ZA3-Ep10", "cKK-E12"
+      ];
+
+      let category = null;
+      if (allowedIonizable.includes(name) || name === "Custom lipid") {
+        category = 'ionizable';
+      } else {
+        if (document.getElementById('filter-peg') && [...document.getElementById('filter-peg').options].some(o => o.value === name)) {
+          category = 'peg';
+        } else if (document.getElementById('filter-sterol') && [...document.getElementById('filter-sterol').options].some(o => o.value === name)) {
+          category = 'sterol';
+        } else if (document.getElementById('filter-helper') && [...document.getElementById('filter-helper').options].some(o => o.value === name)) {
+          category = 'helper';
+        }
+      }
+      
+      if (category) {
+        filterByLipid(category, name);
+      }
+    }
+
+    // Render Formulation Result Cards
+    function renderCards() {
+      const container = document.getElementById('results-container');
+      container.innerHTML = '';
+      
+      document.getElementById('result-count').textContent = filteredDataset.length.toLocaleString();
+      totalPages = Math.ceil(filteredDataset.length / pageSize) || 1;
+      
+      const start = (currentPage - 1) * pageSize;
+      const end = Math.min(start + pageSize, filteredDataset.length);
+      document.getElementById('pagination-info').textContent = `${start + 1} to ${end} of ${filteredDataset.length}`;
+      
+      document.getElementById('btn-prev').disabled = currentPage === 1;
+      document.getElementById('btn-next').disabled = currentPage === totalPages;
+
+      const pageData = filteredDataset.slice(start, end);
+      
+      if(pageData.length === 0) {
+        container.innerHTML = `
+          <div class="flex flex-col items-center justify-center h-48 text-gray-500">
+            <i class="fas fa-search text-3xl mb-3 text-gray-300"></i>
+            <p>No results found matching your current filters.</p>
+          </div>`;
+        return;
+      }
+
+      pageData.forEach(row => {
+        const ratioText = row.lipid_molar_ratio || "N/A";
+        const ionLabel = row.is_custom ? "Custom lipid" : (row.ionizable_lipid || "Custom lipid");
+        const titleParts = [ionLabel, row.peg_lipid, row.sterol_lipid, row.helper_lipid].filter(Boolean);
+        const lnpId = row.lnp_id || "Unknown";
+        
+        let badgeYear = '2025';
+        if (row.paper_year && !isNaN(parseInt(row.paper_year))) {
+          badgeYear = row.paper_year;
+        }
+
+        const card = document.createElement('div');
+        card.className = "border border-gray-200 rounded-xl p-6 hover:border-blue-300 transition bg-white shadow-sm mb-4";
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-3 cursor-pointer group" onclick="toggleDetails('details-${lnpId}')">
+            <div>
+              <h4 class="font-bold text-gray-900 text-[15px] leading-relaxed mb-1 group-hover:text-blue-600 transition-colors">
+                <span class="text-blue-800 font-semibold tracking-wide">${row.is_custom ? "Custom lipid" : (row.ionizable_lipid || 'Custom lipid')}</span> 
+                ${titleParts.length > 1 ? ' : ' + titleParts.slice(1).join(" : ") : ''} = <span class="text-gray-600 font-mono text-sm ml-1">${ratioText}</span>
+              </h4>
+              <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-2">LID: ${lnpId}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded font-bold whitespace-nowrap">
+                ${badgeYear}
+              </span>
+              <button class="border border-gray-200 px-2 py-0.5 rounded hover:bg-gray-50 text-gray-400 group-hover:text-blue-500 transition-colors">
+                <i class="fas fa-bars text-sm"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4 text-[11px] text-gray-500 pb-4 border-b border-gray-100">
+            <div>Particle size (nm) : <span class="font-bold text-gray-900">${row.particle_size_nm_std || ''}</span></div>
+            <div>PDI : <span class="font-bold text-gray-900">${row.pdi_std || ''}</span></div>
+            <div>Zeta potential (mV) : <span class="font-bold text-gray-900">${row.zeta_potential_mv_std || ''}</span></div>
+            <div>Encapsulation efficiency (%) : <span class="font-bold text-gray-900">${row.encapsulation_efficiency_percent_std || ''}</span></div>
+            <div>Target type : <span class="font-bold text-gray-900">${row.target_type || ''}</span></div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Render Data Analytics Charts
+    function renderCharts() {
+      const sizes = filteredDataset
+        .map(r => parseFloat(r.particle_size_nm_std))
+        .filter(s => !isNaN(s) && s >= 50 && s <= 200);
+      
+      const bins = [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200];
+      const histData = new Array(bins.length - 1).fill(0);
+      
+      sizes.forEach(s => {
+        for(let i=0; i<bins.length-1; i++) {
+          if(s >= bins[i] && s < bins[i+1]) {
+            histData[i]++;
+            break;
+          }
+        }
+      });
+      
+      const histLabels = bins.slice(0, -1).map((b, i) => `${b}-${bins[i+1]}`);
+
+      if(chartHistogram) chartHistogram.destroy();
+      const ctxH = document.getElementById('chart-histogram').getContext('2d');
+      chartHistogram = new Chart(ctxH, {
+        type: 'bar',
+        data: {
+          labels: histLabels,
+          datasets: [{
+            label: 'Number of LNPs',
+            data: histData,
+            backgroundColor: '#60a5fa',
+            hoverBackgroundColor: '#3b82f6',
+            barPercentage: 0.9,
+            categoryPercentage: 1.0,
+            borderRadius: 2
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: {
+            x: { 
+              title: {display:true, text:'Particle Size Range (nm)', font:{weight:'bold', size:11}},
+              grid: { display: false }
+            },
+            y: { 
+              title: {display:true, text:'Number of LNPs', font:{weight:'bold', size:11}},
+              grid: { color: '#f1f5f9' },
+              beginAtZero: true
+            }
+          },
+          plugins: { 
+            legend: { 
+              position: 'top', 
+              labels:{boxWidth:16, font:{size:11, family:'Inter'}} 
+            } 
+          }
+        }
+      });
+
+      const ionCounts = {};
+      filteredDataset.forEach(r => {
+        if(r.ionizable_lipid) {
+          const name = r.ionizable_lipid.trim();
+          ionCounts[name] = (ionCounts[name] || 0) + 1;
+        }
+      });
+      
+      const sortedIons = Object.entries(ionCounts).sort((a,b) => b[1] - a[1]).slice(0, 20);
+      const totalIons = sortedIons.reduce((acc, val) => acc + val[1], 0);
+      
+      const doughLabels = sortedIons.map(x => `${x[0]} ${(x[1]/totalIons*100).toFixed(1)}%`);
+      const doughData = sortedIons.map(x => x[1]);
+
+      if(chartDoughnut) chartDoughnut.destroy();
+      const ctxD = document.getElementById('chart-doughnut').getContext('2d');
+      chartDoughnut = new Chart(ctxD, {
+        type: 'doughnut',
+        data: {
+          labels: doughLabels,
+          datasets: [{
+            data: doughData,
+            backgroundColor: [
+              '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', 
+              '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16',
+              '#06b6d4', '#d946ef', '#f43f5e', '#22c55e', '#eab308',
+              '#64748b', '#3730a3', '#9f1239', '#166534', '#b45309'
+            ],
+            borderWidth: 1,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          cutout: '45%',
+          plugins: {
+            legend: { 
+              position: 'right', 
+              labels: { boxWidth: 12, padding: 8, font: {size: 10, family:'Inter'} } 
+            }
+          }
+        }
+      });
+    }
+
+    function generateReferenceTables() {
+      const mappingMap = new Map(Object.entries(STATIC_MAPPING_LIBRARY));
+      const smilesMap = new Map(Object.entries(STATIC_SMILES_LIBRARY));
+      
+      rawDataset.forEach(r => {
+        if (r.ionizable_lipid_original) {
+          const original = r.ionizable_lipid_original.trim();
+          if (original !== '') {
+            mappingMap.set(original, r.is_custom_ion ? "Custom lipid" : (r.ionizable_lipid ? r.ionizable_lipid.trim() : "Custom lipid"));
+          }
+        }
+        if (r.peg_lipid_original) {
+          const original = r.peg_lipid_original.trim();
+          if (original !== '') {
+            mappingMap.set(original, r.is_custom_peg ? "Custom lipid" : (r.peg_lipid ? r.peg_lipid.trim() : "Custom lipid"));
+          }
+        }
+        if (r.sterol_lipid_original) {
+          const original = r.sterol_lipid_original.trim();
+          if (original !== '') {
+            mappingMap.set(original, r.is_custom_sterol ? "Custom lipid" : (r.sterol_lipid ? r.sterol_lipid.trim() : "Custom lipid"));
+          }
+        }
+        if (r.helper_lipid_original) {
+          const original = r.helper_lipid_original.trim();
+          if (original !== '') {
+            mappingMap.set(original, r.is_custom_helper ? "Custom lipid" : (r.helper_lipid ? r.helper_lipid.trim() : "Custom lipid"));
+          }
+        }
+
+        if(r.ionizable_lipid && r.ionizable_lipid_smiles) smilesMap.set(r.ionizable_lipid.trim(), r.ionizable_lipid_smiles.trim());
+        if(r.peg_lipid && r.peg_lipid_smiles) smilesMap.set(r.peg_lipid.trim(), r.peg_lipid_smiles.trim());
+        if(r.sterol_lipid && r.sterol_lipid_smiles) smilesMap.set(r.sterol_lipid.trim(), r.sterol_lipid_smiles.trim());
+        if(r.helper_lipid && r.helper_lipid_smiles) smilesMap.set(r.helper_lipid.trim(), r.helper_lipid_smiles.trim());
+      });
+
+      const mapTbody = document.getElementById('mapping-tbody');
+      mapTbody.innerHTML = '';
+      if(mappingMap.size > 0) {
+        [...mappingMap.entries()].sort().forEach(([original, standard]) => {
+          if (original.trim() !== '') {
+            mapTbody.innerHTML += `
+              <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="handleLibraryClick('${standard.replace(/'/g, "\\'")}')" title="Click to filter by this lipid">
+                <td class="p-4 font-semibold text-gray-900 border-r border-gray-100">${original}</td>
+                <td class="p-4 text-teal-600 hover:underline font-semibold">${standard}</td>
+              </tr>`;
+          }
+        });
+      } else {
+        mapTbody.innerHTML = `<tr><td colspan="2" class="p-8 text-center text-gray-400">No mapping data available in dataset.</td></tr>`;
+      }
+
+      const smilesTbody = document.getElementById('smiles-tbody');
+      smilesTbody.innerHTML = '';
+      if(smilesMap.size > 0) {
+        [...smilesMap.entries()].sort().forEach(([name, smiles]) => {
+          if (name.trim() !== '') {
+            smilesTbody.innerHTML += `
+              <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="handleLibraryClick('${name.replace(/'/g, "\\'")}')" title="Click to filter by this lipid">
+                <td class="p-4 font-bold text-teal-600 hover:underline border-r border-gray-100">${name}</td>
+                <td class="p-4 text-gray-600 break-all leading-relaxed">${smiles}</td>
+              </tr>`;
+          }
+        });
+      } else {
+        smilesTbody.innerHTML = `<tr><td colspan="2" class="p-10 text-center text-gray-400 bg-gray-50"><i class="fas fa-flask mb-2 text-2xl"></i><br>No SMILES data cataloged in the current dataset.</td></tr>`;
+      }
+    }
+
+    function handleCSVUpload(event) {
+      const file = event.target.files[0];
+      if(!file) return;
+      Papa.parse(file, {
+        header: true, dynamicTyping: true, skipEmptyLines: true,
+        complete: function(res) {
+          if(res.data && res.data.length > 0) {
+            rawDataset = res.data.filter(r => r.lnp_id || r.ionizable_lipid);
+            cleanCustomLipidLabels();
+            initApp();
+            alert("Custom dataset loaded successfully.");
+            switchTab('home');
+          } else {
+            alert("Uploaded CSV structure could not be parsed successfully.");
+          }
+        },
+        error: function(err) {
+          alert("Error parsing CSV: " + err.message);
+        }
+      });
+    }
+
+    function exportCSV() {
+      if (filteredDataset.length === 0) {
+        alert("No formulations to export.");
+        return;
+      }
+      const csv = Papa.unparse(filteredDataset);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `lnp_atlas_filtered_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+    }
+  </script>
+
+  <!-- Formulation Detail Modal (Separate Page View) -->
+  <div id="detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto relative flex flex-col border border-gray-100">
+      <!-- Close Button -->
+      <button onclick="closeDetailModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 p-2.5 rounded-full transition-colors z-10">
+        <i class="fas fa-times text-lg"></i>
+      </button>
+      <!-- Modal Body -->
+      <div id="detail-modal-body" class="p-6 sm:p-10">
+        <!-- Content will be injected dynamically -->
+      </div>
+    </div>
+  </div>
+</body>
+</html>
