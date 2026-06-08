@@ -1771,3 +1771,246 @@
   </div>
 </body>
 </html>
+/* ==========================================================================
+   LNP Atlas Custom Main Application Stylesheet
+   ========================================================================== */
+
+/* --- Native Typography Fallback Setup --- */
+:root {
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f4c81 100%);
+  --gray-bg-light: #f8fafc;
+  --gray-bg-med: #f1f5f9;
+  --gray-bg-dark: #e2e8f0;
+  --text-dark: #0f172a;
+  --text-muted: #64748b;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--gray-bg-light);
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+/* --- Navigation Bar --- */
+nav.bg-white {
+  background-color: #ffffff;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.max-w-7xl {
+  max-w: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+}
+
+.logo-container {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: linear-gradient(to bottom right, #3b82f6, #7c3aed);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  font-weight: 500;
+  color: #374151;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover, .nav-links a.active {
+  color: var(--primary-color);
+}
+
+/* --- Hero Section Panel --- */
+.gradient-bg {
+  background: var(--bg-gradient);
+  color: #ffffff;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+  text-align: center;
+}
+
+.gradient-bg h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.gradient-bg p {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  max-width: 48rem;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0.9;
+}
+
+.meta-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+/* --- Metrics Grid Layout --- */
+.py-16 {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.grid-four-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+}
+
+.card-hover {
+  text-align: center;
+  background-color: #f9fafb;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  transition: transform 0.2s ease-out, border-color 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+}
+
+a.group:hover .card-hover {
+  border-color: var(--primary-color);
+}
+
+.stat-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.bg-primary-100 { color: #2563eb; background-color: #dbeafe; }
+.bg-green-100   { color: #16a34a; background-color: #dcfce7; }
+.bg-purple-100  { color: #7e22ce; background-color: #f3e8ff; }
+.bg-orange-100  { color: #ea580c; background-color: #ffedd5; }
+
+/* --- Filters & Main Analytics Layout Split --- */
+.bg-gray-50 { background-color: #f9fafb; }
+.bg-gray-100 { background-color: #f3f4f6; }
+
+.layout-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .layout-split {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .col-span-1 { grid-column: span 1 / span 1; }
+  .col-span-2 { grid-column: span 2 / span 2; }
+  .col-span-3 { grid-column: span 3 / span 3; }
+}
+
+.shadow-lg {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.p-12 { padding: 3rem; }
+
+/* --- Analytics Visualization Cards --- */
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .chart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.chart-card {
+  border: 1px solid var(--gray-bg-dark);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background-color: #ffffff;
+}
+
+.chart-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 1rem;
+}
+
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 260px;
+}
+
+/* --- Animated Loading Spinners --- */
+.animate-spin {
+  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.h-8 { height: 2rem; width: 2rem; border-width: 2px; }
+.h-12 { height: 3rem; width: 3rem; border-width: 3px; }
+.border-primary-600 { border-color: transparent transparent var(--primary-color) var(--primary-color); }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
