@@ -2,7 +2,7 @@
    LNP Atlas Custom Main Application Stylesheet
    ========================================================================== */ 
 
-/* --- Native Typography Fallback Setup --- */
+/* --- Native Typography Fallback Setup --- */ 
 :root {
   --primary-color: #3b82f6;
   --primary-hover: #2563eb;
